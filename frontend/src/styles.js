@@ -6,7 +6,8 @@ page:{
   minHeight:"100vh",
   padding:"16px",
   width:"100%",
-  maxWidth:"500px"
+  maxWidth:"500px",
+  boxSizing:"border-box"
 },
 card: {
   position: "relative",
