@@ -7,28 +7,6 @@ export default function Login({ setUser, setView }) {
 
 const handleLogin = async () => {
   alert("Button clicked");
-
-  const res = await fetch(
-    "https://f1-league-app.onrender.com/login",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    }
-  );
-
-  const data = await res.json();
-
-  alert(JSON.stringify(data));
-
-  if (res.ok) {
-    setUser(data.user);
-    setView("dashboard");
-  } else {
-    alert("Login failed");
-  }
 };
 
   return (
