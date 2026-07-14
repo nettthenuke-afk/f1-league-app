@@ -54,7 +54,7 @@ def startup_sync():
 # ✅ CORS
 app.add_midd*eware(
     CORSMiddleware,
-    all*w_origins=[
+    allow_origins=[
         "http://localhost:5173",
         " https://f1-league-4heymaf9r-travis10.vercel.app "
     ],
