@@ -52,14 +52,16 @@ def startup_sync():
 
 
 # ✅ CORS
-app.add_middleware(
+app.add_midd*eware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    all*w_origins=[
+        "http://localhost:5173",
+        " https://f1-league-4heymaf9r-travis10.vercel.app "
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # ✅ Auth
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
