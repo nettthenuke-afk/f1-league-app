@@ -56,7 +56,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        " https://f1-league-4heymaf9r-travis10.vercel.app "
+        "https://f1-league-app-beryl.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
