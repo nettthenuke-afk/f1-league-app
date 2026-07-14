@@ -6,7 +6,7 @@ page:{
   minHeight:"100vh",
   padding:"16px",
   width:"100%",
-  maxWidth:"600px"
+  maxWidth:"500px"
 },
 card: {
   position: "relative",
@@ -437,7 +437,6 @@ weeklyWinsTitle: {
   fontWeight: "900",
   textAlign: "center",
   textTransform: "uppercase",
-  WebkitTextStroke: "1.5px #0047b3",
   textShadow: "none",
 },
 
@@ -564,7 +563,6 @@ zeroPointWeeksTitle: {
   fontSize: "clamp(24px, 6vw, 48px)",
   fontWeight: "900",
   textAlign: "center",
-  WebkitTextStroke: "1.5px #8b1e3f",
   textShadow: "none",
   letterSpacing: "0px",
   paddingTop: "10px",
