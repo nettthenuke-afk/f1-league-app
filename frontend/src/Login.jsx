@@ -28,10 +28,9 @@ const handleLogin = async () => {
           onChange={e => setPassword(e.target.value)}
         />
 
-<button
-  onClick={() => alert("CLICK WORKS")}
->
+<button style={styles.loginButton} onClick={handleLogin}>
   Login
+  <span style={styles.loginButtonAccent}></span>
 </button>
 
       </div>
