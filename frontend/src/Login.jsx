@@ -31,16 +31,6 @@ const handleLogin = async () => {
   }
 };
 
-    const data = await res.json();
-
-    if (res.ok) {
-      setUser(data.user);
-      setView("dashboard");
-    } else {
-      alert("Login failed");
-    }
-  };
-
   return (
     <div style={styles.loginWrapper}>
       <div style={styles.loginCard}>
