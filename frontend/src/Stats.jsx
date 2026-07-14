@@ -11,19 +11,19 @@ export default function Stats({ setView }) {
   const [zeroPointWeeks, setZeroPointWeeks] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/hall-of-champions")
+    fetch("https://f1-league-app.onrender.com/hall-of-champions")
       .then(res => res.json())
       .then(data => setChampions(data));
-    fetch("http://127.0.0.1:8000/lifetime-standings")
+    fetch("https://f1-league-app.onrender.com/lifetime-standings")
   .then(res => res.json())
   .then(data => setLifetimeStandings(data));
-   fetch("http://127.0.0.1:8000/weekly-wins")
+   fetch("https://f1-league-app.onrender.com/weekly-wins")
   .then(res => res.json())
   .then(data => setWeeklyWins(data));
-  fetch("http://127.0.0.1:8000/weekly-last-places")
+  fetch("https://f1-league-app.onrender.com/weekly-last-places")
   .then(res => res.json())
   .then(data => setWeeklyLastPlaces(data));
-  fetch("http://127.0.0.1:8000/zero-point-weeks")
+  fetch("https://f1-league-app.onrender.com/zero-point-weeks")
   .then(res => res.json())
   .then(data => setZeroPointWeeks(data));
   }, []);

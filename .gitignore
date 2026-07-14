@@ -8,11 +8,6 @@ __pycache__/
 node_modules/
 dist/
 
-# Databases
-*.db
-f1_league
-test
-
 # VS Code
 .vscode/
 

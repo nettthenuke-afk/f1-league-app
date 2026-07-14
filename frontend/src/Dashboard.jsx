@@ -7,7 +7,7 @@ export default function Dashboard({ user, race, setView }) {
   const DASHBOARD_SPACING = "16px";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/standings")
+    fetch("https://f1-league-app.onrender.com/standings")
       .then(res => res.json())
       .then(data => setStandings(data));
   }, []);

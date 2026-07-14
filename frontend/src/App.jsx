@@ -11,7 +11,7 @@ function App() {
   const [race, setRace] = useState(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/current-race")
+    fetch("https://f1-league-app.onrender.com/current-race")
       .then(res => res.json())
       .then(data => setRace(data))
       .catch(() => {});

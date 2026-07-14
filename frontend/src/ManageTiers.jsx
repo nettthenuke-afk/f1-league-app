@@ -22,7 +22,7 @@ export default function ManageTiers({ user, setView }) {
 
   // ✅ LOAD TEAMS
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/teams")
+    fetch("https://f1-league-app.onrender.com/teams")
       .then(res => res.json())
       .then(data => {
         setTeams(data);
@@ -48,7 +48,7 @@ export default function ManageTiers({ user, setView }) {
   // ✅ SAVE TIERS
   const save = async () => {
     for (const team_id in localTiers) {
-      await fetch("http://127.0.0.1:8000/set-team-tier", {
+      await fetch("https://f1-league-app.onrender.com/set-team-tier", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

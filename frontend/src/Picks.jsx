@@ -12,7 +12,7 @@ export default function Picks({ user, setView, race }) {
 
 useEffect(() => {
   const load = () => {
-    fetch("http://127.0.0.1:8000/pick-options")
+    fetch("https://f1-league-app.onrender.com/pick-options")
       .then(res => res.json())
       .then(data => setPickOptions(data));
   };
@@ -25,14 +25,14 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  fetch("http://127.0.0.1:8000/users")
+  fetch("https://f1-league-app.onrender.com/users")
     .then(res => res.json())
     .then(data => setUsers(data));
 }, []);
 
 useEffect(() => {
   const loadDraft = () => {
-    fetch("http://127.0.0.1:8000/draft-status")
+    fetch("https://f1-league-app.onrender.com/draft-status")
       .then(res => res.json())
       .then(data => setDraftStatus(data));
   };
@@ -84,7 +84,7 @@ const pickOrder = draftStatus?.pick_order || [];
 const save = async () => {
   try {
     const response = await fetch(
-      "http://127.0.0.1:8000/submit-picks",
+      "https://f1-league-app.onrender.com/submit-picks",
       {
         method: "POST",
         headers: {
@@ -117,12 +117,12 @@ const save = async () => {
 alert("Picks Saved");
 
 // Refresh draft status
-fetch("http://127.0.0.1:8000/draft-status")
+fetch("https://f1-league-app.onrender.com/draft-status")
   .then(res => res.json())
   .then(data => setDraftStatus(data));
 
 // Refresh driver availability
-fetch("http://127.0.0.1:8000/pick-options")
+fetch("https://f1-league-app.onrender.com/pick-options")
   .then(res => res.json())
   .then(data => setPickOptions(data));
 
