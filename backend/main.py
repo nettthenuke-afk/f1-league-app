@@ -52,7 +52,7 @@ def startup_sync():
 
 
 # ✅ CORS
-app.add_midd*eware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
