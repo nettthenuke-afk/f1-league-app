@@ -316,7 +316,7 @@ statsHeader: {
   background: "linear-gradient(180deg, #e10600 0%, #c00000 100%)",
   color: "#ffffff",
   fontFamily: "'Arial Black', Arial, sans-serif",
-  fontSize: "48px",
+  fontSize: "clamp(24px, 6vw, 48px)",
   fontWeight: "900",
   textAlign: "center",
   padding: "26px",
@@ -363,7 +363,7 @@ hallOfChampionsCard: {
 
 hallOfChampionsTitle: {
   fontFamily: "Georgia, 'Times New Roman', serif",
-  fontSize: "72px",
+  fontSize: "clamp(24px, 6vw, 48px)",
   fontWeight: "700",
   lineHeight: "1.2",
   paddingTop: "15px",
@@ -401,25 +401,18 @@ jpsStripeBottom: {
   left: 0,
   width: "100%",
   height: "6px",
-
   background:
     "linear-gradient(90deg, #8b6a00 0%, #f4dc7a 45%, #fff2b8 50%, #f4dc7a 55%, #8b6a00 100%)",
 },
 
 championRow: {
   color: "#e3c55a",
-
   fontFamily: "Georgia, 'Times New Roman', serif",
   fontSize: "34px",
-
   marginBottom: "24px",
-
   padding: "18px",
-
   border: "4px solid #caa43b",
-
   background: "rgba(227,197,90,0.04)",
-
   borderRadius: "6px",
 },
 
@@ -440,7 +433,7 @@ weeklyWinsCard: {
 weeklyWinsTitle: {
   color: "#ffffff",
   fontFamily: "'Arial Black', Arial, sans-serif",
-  fontSize: "36px",
+  fontSize: "clamp(24px, 6vw, 48px)",
   fontWeight: "900",
   textAlign: "center",
   textTransform: "uppercase",
@@ -489,7 +482,7 @@ background: "linear-gradient(135deg, #ff7a00 0%, #ff7a00 24%, #f4f4f4 32%, #f4f4
 weeklyLastPlaceTitle: {
   color: "#111111",
   fontFamily: "'Arial Black', Arial, sans-serif",
-  fontSize: "34px",
+  fontSize: "clamp(24px, 6vw, 48px)",
   fontWeight: "900",
   textAlign: "center",
   letterSpacing: "2px",
@@ -526,7 +519,7 @@ lifetimeStandingsCard: {
 lifetimeStandingsTitle: {
   color: "#111111",
   fontFamily: "'Trebuchet MS', Arial, sans-serif",
-  fontSize: "34px",
+  fontSize: "clamp(24px, 6vw, 48px)",
   fontWeight: "900",
   textAlign: "center",
   letterSpacing: "1px",
@@ -568,7 +561,7 @@ zeroPointWeeksCard: {
 zeroPointWeeksTitle: {
   color: "#d0af57",
   fontFamily: "'Segoe UI', sans-serif",
-  fontSize: "34px",
+  fontSize: "clamp(24px, 6vw, 48px)",
   fontWeight: "900",
   textAlign: "center",
   WebkitTextStroke: "1.5px #8b1e3f",

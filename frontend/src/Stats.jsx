@@ -9,6 +9,7 @@ export default function Stats({ setView }) {
   const [weeklyWins, setWeeklyWins] = useState([]);
   const [weeklyLastPlaces, setWeeklyLastPlaces] = useState([]);
   const [zeroPointWeeks, setZeroPointWeeks] = useState([]);
+  const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
     fetch("https://f1-league-app.onrender.com/hall-of-champions")
