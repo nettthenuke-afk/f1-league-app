@@ -643,15 +643,16 @@ driverHistoryCard: {
 
 driverHistoryTitle: {
   color: "#123A7A",
-  fontFamily: "'Arial Narrow', 'Franklin Gothic Heavy', sans-serif",
-  fontStyle: "italic",
+  fontFamily: "Georgia, serif",
   fontWeight: "900",
+  fontStyle: "normal",
   letterSpacing: "6px",
   textTransform: "uppercase",
   textAlign: "center",
   fontSize: "clamp(36px, 6vw, 64px)",
   marginBottom: "25px",
-  fontSize: "clamp(42px, 7vw, 70px)",
+  fontSize: "clamp(24px, 5vw, 42px)",
+  whiteSpace: "nowrap",
 },
 
 driverHistoryRow: {
