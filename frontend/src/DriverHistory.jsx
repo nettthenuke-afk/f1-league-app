@@ -35,13 +35,15 @@ export default function DriverHistory({ setView }) {
         ))}
       </div>
 
-<div style={{ marginTop: "30px" }}>
-  <button
-    style={styles.sennaButton}
-    onClick={() => setView("dashboard")}
-  >
-    Return to Paddock
-  </button>
-</div>
+      <div style={{ marginTop: "30px" }}>
+        <button
+          style={styles.sennaButton}
+          onClick={() => setView("dashboard")}
+        >
+          Return to Paddock
+        </button>
+      </div>
+
+    </div>
   );
 }
