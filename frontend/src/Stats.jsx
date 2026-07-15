@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import styles from "./styles";
 import ferrariShield from "./ferrari-shield.png";
 
+import {
+  HISTORICAL_LIFETIME_POINTS,
+  HISTORICAL_WEEKLY_WINS,
+  HISTORICAL_WEEKLY_LAST_PLACES,
+  HISTORICAL_ZERO_POINT_WEEKS,
+  combineChampions,
+  combineBaselineWithLive,
+} from "./historicalStats";
+
 export default function Stats({ setView }) {
 
   const [champions, setChampions] = useState([]);
@@ -28,6 +37,32 @@ export default function Stats({ setView }) {
   .then(res => res.json())
   .then(data => setZeroPointWeeks(data));
   }, []);
+
+const displayedChampions = combineChampions(champions);
+
+const displayedLifetimeStandings = combineBaselineWithLive(
+  lifetimeStandings,
+  HISTORICAL_LIFETIME_POINTS,
+  "points"
+);
+
+const displayedWeeklyWins = combineBaselineWithLive(
+  weeklyWins,
+  HISTORICAL_WEEKLY_WINS,
+  "wins"
+);
+
+const displayedWeeklyLastPlaces = combineBaselineWithLive(
+  weeklyLastPlaces,
+  HISTORICAL_WEEKLY_LAST_PLACES,
+  "last_places"
+);
+
+const displayedZeroPointWeeks = combineBaselineWithLive(
+  zeroPointWeeks,
+  HISTORICAL_ZERO_POINT_WEEKS,
+  "zero_point_weeks"
+);
 
   return (
     <div style={styles.statsPage}>
@@ -62,7 +97,7 @@ export default function Stats({ setView }) {
   <div style={styles.jpsStripeBottom}></div>
 
   <div style={styles.hallOfChampionsList}>
-{champions.map(c => (
+{displayedChampions.map(c => (
   <div
     key={c.year}
     style={styles.championRow}
@@ -79,7 +114,7 @@ export default function Stats({ setView }) {
 
   <div style={styles.weeklyWinsDivider}></div>
 
-{weeklyWins.map((driver, index) => (
+{displayedWeeklyWins.map((driver, index) => (
   <div
     key={driver.username}
     style={styles.weeklyWinsRow}
@@ -94,7 +129,7 @@ export default function Stats({ setView }) {
     💩 Weekly Last Places
   </div>
 
-{weeklyLastPlaces.map((driver, index) => (
+{displayedWeeklyLastPlaces.map((driver, index) => (
   <div
     key={driver.username}
     style={styles.weeklyLastPlaceRow}
@@ -111,7 +146,7 @@ export default function Stats({ setView }) {
 
   <div style={styles.lifetimeStandingsDivider}></div>
 
-  {lifetimeStandings.map((driver, index) => (
+  {displayedLifetimeStandings.map((driver, index) => (
     <div
       key={driver.username}
       style={styles.lifetimeStandingsRow}
@@ -126,7 +161,7 @@ export default function Stats({ setView }) {
     😬 Most Zero-Point Weeks
   </div>
 
-  {zeroPointWeeks.map((driver, index) => (
+  {displayedZeroPointWeeks.map((driver, index) => (
     <div
       key={driver.username}
       style={styles.zeroPointWeeksRow}
