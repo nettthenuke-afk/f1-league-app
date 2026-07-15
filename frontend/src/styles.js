@@ -657,8 +657,8 @@ driverHistoryTitle: {
 
 driverHistoryRow: {
   display: "grid",
-  gridTemplateColumns: "40px 1fr 95 px 75 px",
-  gap: "10px",
+  gridTemplateColumns: "50px 1fr auto auto",
+  gap: "12px",
   alignItems: "center",
   padding: "12px",
   marginBottom: "8px",
@@ -684,13 +684,11 @@ driverHistoryStats: {
   color: "#123A7A",
   fontWeight: "900",
   whiteSpace: "nowrap",
-  textAlign: "right",
-},
+  },
 
 driverHistoryPercentage: {
   color: "#123A7A",
   fontWeight: "900",
-  testAlign: "right",
   whiteSpace: "nowrap",
 },
 
