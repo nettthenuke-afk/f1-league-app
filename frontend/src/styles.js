@@ -688,6 +688,7 @@ driverHistoryStats: {
   fontWeight: "900",
   whiteSpace: "nowrap",
   textAlign: "right",
+  fontSize: "0.82rem",
 },
 
 driverHistoryPercentage: {
