@@ -8,7 +8,7 @@ export default function DriverHistory({ setView }) {
     <div style={styles.page}>
       <div style={styles.driverHistoryCard}>
         <h1 style={styles.driverHistoryTitle}>
-          🐪 Driver History
+          🐪 Pick History
         </h1>
 
         {HISTORICAL_DRIVER_PICK_HISTORY.map((driver, index) => (

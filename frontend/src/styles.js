@@ -646,13 +646,17 @@ driverHistoryTitle: {
   fontFamily: "Georgia, serif",
   fontWeight: "900",
   fontStyle: "normal",
-  letterSpacing: "10px",
+  letterSpacing: "3px",
   textTransform: "uppercase",
   textAlign: "center",
   fontSize: "clamp(36px, 6vw, 64px)",
   marginBottom: "25px",
-  fontSize: "clamp(24px, 5vw, 42px)",
-  whiteSpace: "nowrap",
+  fontSize: "clamp(20px, 4vw, 38px)",
+  whiteSpace: "normal",
+  overflowWrap: "break-work",
+  lineHeight: "1.1",
+  width: "90%"
+  maxWidth: "90%"
 },
 
 driverHistoryRow: {
