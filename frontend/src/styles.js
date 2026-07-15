@@ -646,7 +646,7 @@ driverHistoryTitle: {
   fontFamily: "Georgia, serif",
   fontWeight: "900",
   fontStyle: "normal",
-  letterSpacing: "6px",
+  letterSpacing: "10px",
   textTransform: "uppercase",
   textAlign: "center",
   fontSize: "clamp(36px, 6vw, 64px)",
@@ -657,14 +657,14 @@ driverHistoryTitle: {
 
 driverHistoryRow: {
   display: "grid",
-  gridTemplateColumns: "50px 1fr auto auto",
-  gap: "12px",
+  gridTemplateColumns: "40px 1fr 95 px 75 px",
+  gap: "10px",
   alignItems: "center",
   padding: "12px",
   marginBottom: "8px",
   background: "#F7D74A",
   borderRadius: "10px",
-  border: "2px solid #1E4E9D",
+  border: "2px solid #123A7A",
   boxShadow: "inset 0 0 0 1px rgba(30,78,157,.2)",
 },
 
@@ -683,11 +683,15 @@ driverHistoryDriver: {
 driverHistoryStats: {
   color: "#123A7A",
   fontWeight: "900",
+  whiteSpace: "nowrap",
+  textAlign: "right",
 },
 
 driverHistoryPercentage: {
   color: "#123A7A",
   fontWeight: "900",
+  testAlign: "right",
+  whiteSpace: "nowrap",
 },
 
 driverHistoryButton: {
