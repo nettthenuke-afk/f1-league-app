@@ -628,6 +628,86 @@ statsButtonText: {
     "inset 0 2px 0 rgba(255,255,255,0.25) 0 0 15px rgba(255,80,0,0.8)"
 },
 
+// ====== DRIVER HISTORY ======
+driverHistoryCard: {
+  background: "#F4C300",
+  border: "5px solid #1E4E9D",
+  borderRadius: "20px",
+  width: "95%",
+  maxWidth: "900px",
+  margin: "0 auto",
+  padding: "25px",
+  boxShadow: "0 0 25px rgba(244,195,0,.45)",
+  backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,.15), rgba(255,255,255,0))",
+},
+
+driverHistoryTitle: {
+  color: "#1E4E9D",
+  fontFamily: "Impact, Arial Black, sans-serif",
+  fontStyle: "italic",
+  textTransform: "uppercase",
+  letterSpacing: "3px",
+  textAlign: "center",
+  fontSize: "clamp(36px, 6vw, 64px)",
+  marginBottom: "25px",
+  textShadow: "2px 2px 0 rgba(255,255,255,.35)",
+},
+
+driverHistoryRow: {
+  display: "grid",
+  gridTemplateColumns: "50px 1fr auto auto",
+  gap: "12px",
+  alignItems: "center",
+  padding: "12px",
+  marginBottom: "8px",
+  background: "#F7D74A",
+  borderRadius: "10px",
+  border: "2px solid #1E4E9D",
+  boxShadow: "inset 0 0 0 1px rgba(30,78,157,.2)",
+},
+
+driverHistoryRank: {
+  color: "#1E4E9D",
+  fontWeight: "900",
+  fontSize: "18px",
+},
+
+driverHistoryDriver: {
+  color: "#1E4E9D",
+  fontWeight: "900",
+  fontSize: "18px",
+},
+
+driverHistoryStats: {
+  color: "#1E4E9D",
+  fontWeight: "900",
+},
+
+driverHistoryPercentage: {
+  color: "#1E4E9D",
+  fontWeight: "900",
+},
+
+driverHistoryButton: {
+  position: "relative",
+  overflow: "hidden",
+  width: "100%",
+  maxWidth: "500px",
+  padding: "18px",
+  marginTop: "16px",
+  borderRadius: "14px",
+  border: "3px solid #ffffff",
+  background:
+    "linear-gradient(90deg,#ffffff 0%,#ffffff 42%,#ffe600 42%,#ffe600 48%,#ff2c2c 48%,#ff2c2c 54%,#111111 54%,#111111 60%,#ffffff 60%,#ffffff 100%)",
+  color: "#111111",
+  fontWeight: "900",
+  fontSize: "22px",
+  letterSpacing: "1px",
+  textTransform: "uppercase",
+  cursor: "pointer",
+  boxShadow: "0 0 20px rgba(255,230,0,.35)",
+},
+
 };
 
 export default styles;
