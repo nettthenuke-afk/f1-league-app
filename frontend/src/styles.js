@@ -633,7 +633,7 @@ driverHistoryCard: {
   background: "#F4C300",
   border: "5px solid #1E4E9D",
   borderRadius: "20px",
-  width: "95%",
+  width: "90%",
   maxWidth: "900px",
   margin: "0 auto",
   padding: "25px",
@@ -642,15 +642,15 @@ driverHistoryCard: {
 },
 
 driverHistoryTitle: {
-  color: "#1E4E9D",
-  fontFamily: "Impact, Arial Black, sans-serif",
+  color: "#123A7A",
+  fontFamily: "'Franklin Gothic Heavy', 'Arial Narrow', sans-serif",
   fontStyle: "italic",
+  fontWeight: "900",
+  letterSpacing: "6px",
   textTransform: "uppercase",
-  letterSpacing: "3px",
   textAlign: "center",
   fontSize: "clamp(36px, 6vw, 64px)",
   marginBottom: "25px",
-  textShadow: "2px 2px 0 rgba(255,255,255,.35)",
 },
 
 driverHistoryRow: {
@@ -667,24 +667,24 @@ driverHistoryRow: {
 },
 
 driverHistoryRank: {
-  color: "#1E4E9D",
+  color: #123A7A",
   fontWeight: "900",
   fontSize: "18px",
 },
 
 driverHistoryDriver: {
-  color: "#1E4E9D",
+  color: "#123A7A",
   fontWeight: "900",
   fontSize: "18px",
 },
 
 driverHistoryStats: {
-  color: "#1E4E9D",
+  color: "#123A7A",
   fontWeight: "900",
 },
 
 driverHistoryPercentage: {
-  color: "#1E4E9D",
+  color: "#123A7A",
   fontWeight: "900",
 },
 
@@ -698,11 +698,13 @@ driverHistoryButton: {
   borderRadius: "14px",
   border: "3px solid #ffffff",
   background:
-    "linear-gradient(90deg,#ffffff 0%,#ffffff 42%,#ffe600 42%,#ffe600 48%,#ff2c2c 48%,#ff2c2c 54%,#111111 54%,#111111 60%,#ffffff 60%,#ffffff 100%)",
+  "linear-gradient(90deg,#ffe600 0%,#ffe600 12%,#ff2c2c 12%,#ff2c2c 24%,#111111 24%,#111111 36%,#ffffff 36%,#ffffff 100%)",
   color: "#111111",
   fontWeight: "900",
   fontSize: "22px",
   letterSpacing: "1px",
+  paddingLeft: "80px",
+  textAlign: "left",
   textTransform: "uppercase",
   cursor: "pointer",
   boxShadow: "0 0 20px rgba(255,230,0,.35)",

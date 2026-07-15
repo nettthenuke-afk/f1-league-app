@@ -119,7 +119,7 @@ export default function Dashboard({ user, race, setView }) {
     style={styles.driverHistoryButton}
     onClick={() => setView("driverHistory")}
   >
-    📊 Pick History
+    Pick History
   </button>
 
 </div>
