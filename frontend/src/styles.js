@@ -667,7 +667,7 @@ driverHistoryRow: {
 },
 
 driverHistoryRank: {
-  color: #123A7A",
+  color: "#123A7A",
   fontWeight: "900",
   fontSize: "18px",
 },
