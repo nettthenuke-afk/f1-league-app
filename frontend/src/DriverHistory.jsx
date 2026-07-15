@@ -24,14 +24,9 @@ export default function DriverHistory({ setView }) {
               {driver.driver}
             </div>
 
-            <div style={styles.driverHistoryStats}>
-              {driver.picks} Picks
-            </div>
-
-            <div style={styles.driverHistoryPercentage}>
-              {driver.percentage.toFixed(1)}%
-            </div>
-          </div>
+	   <div style={styles.driverHistoryStats}>
+	     {driver.picks} Picks • {driver.percentage.toFixed(1)}%
+  	   </div>          </div>
         ))}
       </div>
 
