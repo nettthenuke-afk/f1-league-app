@@ -135,3 +135,7 @@ export default function Dashboard({ user, race, setView }) {
     </button>
   </div>
 )}
+
+    </div>
+  );
+}
