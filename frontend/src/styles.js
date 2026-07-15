@@ -655,8 +655,8 @@ driverHistoryTitle: {
   whiteSpace: "normal",
   overflowWrap: "break-work",
   lineHeight: "1.1",
-  width: "90%"
-  maxWidth: "90%"
+  width: "90%",
+  maxWidth: "90%",
 },
 
 driverHistoryRow: {
