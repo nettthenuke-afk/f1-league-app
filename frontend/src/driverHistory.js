@@ -1,7 +1,3 @@
-import {
-  HISTORICAL_DRIVER_PICK_HISTORY
-} from "./driverHistory";
-
 export const HISTORICAL_DRIVER_PICK_HISTORY_TOTAL_RACES = 99;
 
 export const HISTORICAL_DRIVER_PICK_HISTORY = [
