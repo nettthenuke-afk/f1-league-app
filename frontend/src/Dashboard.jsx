@@ -106,23 +106,24 @@ export default function Dashboard({ user, race, setView }) {
 
 <div style={{ marginTop: "16px" }}>
 
-<button
-  style={styles.statsButton}
-  onClick={() => setView("stats")}
->
-  <span style={styles.statsButtonText}>
-    Statistics
-  </span>
-</button>
+  <button
+    style={styles.statsButton}
+    onClick={() => setView("stats")}
+  >
+    <span style={styles.statsButtonText}>
+      Statistics
+    </span>
+  </button>
 
-<button
-  style={styles.driverHistoryButton}
-  onClick={() => setView("driverHistory")}
->
-  Pick History
-</button>
+  <button
+    style={styles.driverHistoryButton}
+    onClick={() => setView("driverHistory")}
+  >
+    📊 Pick History
+  </button>
 
-{/* MANAGE TIERS */}
+</div>
+
 {user?.role === "admin" && (
   <div style={{ marginTop: "30px" }}>
     <button
