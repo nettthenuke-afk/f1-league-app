@@ -696,16 +696,12 @@ driverHistoryButton: {
   marginTop: "16px",
   borderRadius: "14px",
   border: "3px solid #ffffff",
-
   background:
     "linear-gradient(90deg,#ffffff 0%,#ffffff 14%,#ffe600 14%,#ffe600 22%,#ff2c2c 22%,#ff2c2c 30%,#111111 30%,#111111 38%,#ffffff 38%,#ffffff 100%)",
-
   color: "#111111",
   fontWeight: "900",
   fontSize: "22px",
-
-  textAlign: "left",
-
+  textAlign: "right",
   letterSpacing: "1px",
   textTransform: "uppercase",
   cursor: "pointer",
