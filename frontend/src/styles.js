@@ -700,6 +700,7 @@ driverHistoryPercentage: {
 driverHistoryButton: {
   width: "100%",
   maxWidth: "500px",
+  height: "110px",
   padding: "18px 24px 18px 100px",
   marginTop: "16px",
   borderRadius: "14px",
