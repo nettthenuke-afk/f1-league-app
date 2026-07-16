@@ -820,33 +820,33 @@ ownerHistoryTitle: {
 },
 
 ownerHistoryCard: {
-  background:
-    "linear-gradient(135deg,#ff7a1a 0%,#ff4200 35%,#ff1f00 65%,#ff6a00 100%)",
+  background: "#ff4d00",
   border: "3px solid #ffffff",
   borderRadius: "18px",
-  padding: "20px",
+  padding: "0",
   marginBottom: "24px",
-  boxShadow: "0 0 12px rgba(255,80,0,0.35)",
+  overflow: "hidden",
+  boxShadow: "0 0 14px rgba(255,90,0,0.45)",
 },
 
 ownerHistoryOwnerName: {
   fontFamily: '"Times New Roman", serif',
-  fontSize: "34px",
+  fontSize: "38px",
   fontWeight: "900",
   color: "#ffffff",
   textAlign: "center",
   textTransform: "uppercase",
-  marginBottom: "12px",
   letterSpacing: "1px",
+  margin: "0",
+  padding: "16px 20px",
 
   textShadow:
-    "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+    "-1px 0 #000, 1px 0 #000, 0 -1px #000, 0 1px #000",
 },
 
 ownerHistorySection: {
   borderTop: "2px solid #ffffff",
-  paddingTop: "10px",
-  paddingBottom: "10px",
+  padding: "12px 20px",
 },
 
 ownerHistoryStat: {
