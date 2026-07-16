@@ -5,6 +5,7 @@ import Picks from "./Picks";
 import ManageTiers from "./ManageTiers";   // ✅ IMPORTANT
 import Stats from "./Stats";
 import DriverHistory from "./DriverHistory";
+import OwnerHistory from "./OwnerHistory";
 
 function App() {
   const [view, setView] = useState("login");
@@ -43,9 +44,20 @@ if (view === "stats") {
   return <Stats user={user} setView={setView} />;
 }
 
+// ✅ Driver History
 if (view === "driverHistory") {
   return (
     <DriverHistory
+      user={user}
+      setView={setView}
+    />
+  );
+}
+
+// ✅ OWNER HISTORY
+if (view === "ownerHistory") {
+  return (
+    <OwnerHistory
       user={user}
       setView={setView}
     />

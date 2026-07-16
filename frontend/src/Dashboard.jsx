@@ -105,7 +105,6 @@ export default function Dashboard({ user, race, setView }) {
 
 
 <div style={{ marginTop: "16px" }}>
-
   <button
     style={styles.statsButton}
     onClick={() => setView("stats")}
@@ -122,6 +121,12 @@ export default function Dashboard({ user, race, setView }) {
     Pick History
   </button>
 
+  <button
+    style={styles.ownerHistoryButton}
+    onClick={() => setView("ownerHistory")}
+  >
+    Owner History
+  </button>
 </div>
 
 {user?.role === "admin" && (
@@ -136,6 +141,6 @@ export default function Dashboard({ user, race, setView }) {
   </div>
 )}
 
-    </div>
-  );
+</div>
+);
 }
