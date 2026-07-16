@@ -1,13 +1,10 @@
 import React from "react";
 import { HISTORICAL_OWNER_HISTORY } from "./ownerHistory";
+import * as styles from "./styles";
 
 export default function OwnerHistory({ setView }) {
   return (
     <div>
-      <button onClick={() => setView("dashboard")}>
-        ← Dashboard
-      </button>
-
       <h1>OWNER HISTORY</h1>
 
       {Object.entries(HISTORICAL_OWNER_HISTORY).map(
@@ -67,17 +64,22 @@ export default function OwnerHistory({ setView }) {
             <p>
               {data.bestValueDriver.pointsPerPick} pts/pick
             </p>
-
-            <p>
-              {data.bestValueDriver.totalPoints} total points
-            </p>
-
-            <p>
-              {data.bestValueDriver.picks} picks
-            </p>
           </div>
         )
       )}
+
+      <div style={{ marginTop: "30px" }}>
+        <button
+          style={styles.backButton}
+          onClick={() => setView("dashboard")}
+        >
+          <div style={styles.sennaStripeTop}></div>
+
+          🏁 Return to Paddock
+
+          <div style={styles.sennaStripeBottom}></div>
+        </button>
+      </div>
     </div>
   );
 }

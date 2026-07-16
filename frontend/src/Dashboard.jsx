@@ -121,12 +121,25 @@ export default function Dashboard({ user, race, setView }) {
     Pick History
   </button>
 
-  <button
-    style={styles.ownerHistoryButton}
-    onClick={() => setView("ownerHistory")}
-  >
-    Owner History
-  </button>
+<button
+  style={styles.ownerHistoryButton}
+  onClick={() => setView("ownerHistory")}
+>
+  <div style={styles.ownerHistoryStripeRed}></div>
+  <div style={styles.ownerHistoryStripeRedRight}></div>
+
+  <div style={styles.ownerHistoryStripeBlue}></div>
+  <div style={styles.ownerHistoryStripeBlueRight}></div>
+
+  <div style={styles.ownerHistoryStripeYellow}></div>
+  <div style={styles.ownerHistoryStripeYellowRight}></div>
+
+  <span style={styles.ownerHistoryButtonText}>
+    OWNER
+    <br />
+    HISTORY
+  </span>
+</button>
 </div>
 
 {user?.role === "admin" && (

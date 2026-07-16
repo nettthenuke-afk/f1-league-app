@@ -715,6 +715,92 @@ driverHistoryButton: {
   cursor: "pointer",
 },
 
+//===== OWNER HISTORY BUTTON ======
+ownerHistoryButton: {
+  position: "relative",
+  width: "100%",
+  maxWidth: "320px",
+  height: "110px",
+  background: "#050505",
+  border: "2px solid #222",
+  borderRadius: "16px",
+  cursor: "pointer",
+  overflow: "hidden",
+  marginTop: "20px",
+  boxShadow: "0 6px 14px rgba(0,0,0,0.45)",
+},
+
+ownerHistoryStripeRed: {
+  position: "absolute",
+  top: "28px",
+  left: 0,
+  width: "34%",
+  height: "12px",
+  background: "#E10600",
+},
+
+ownerHistoryStripeRedRight: {
+  position: "absolute",
+  top: "28px",
+  right: 0,
+  width: "34%",
+  height: "12px",
+  background: "#E10600",
+},
+
+ownerHistoryStripeBlue: {
+  position: "absolute",
+  top: "49px",
+  left: 0,
+  width: "34%",
+  height: "12px",
+  background: "#0057D9",
+},
+
+ownerHistoryStripeBlueRight: {
+  position: "absolute",
+  top: "49px",
+  right: 0,
+  width: "34%",
+  height: "12px",
+  background: "#0057D9",
+},
+
+ownerHistoryStripeYellow: {
+  position: "absolute",
+  top: "70px",
+  left: 0,
+  width: "34%",
+  height: "12px",
+  background: "#F7C600",
+},
+
+ownerHistoryStripeYellowRight: {
+  position: "absolute",
+  top: "70px",
+  right: 0,
+  width: "34%",
+  height: "12px",
+  background: "#F7C600",
+},
+
+ownerHistoryButtonText: {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  color: "#FFFFFF",
+  fontSize: "18px",
+  fontWeight: "700",
+  textAlign: "center",
+  lineHeight: "1.0",
+  letterSpacing: "1px",
+  textTransform: "uppercase",
+  zIndex: 5,
+  background: "#050505",
+  padding: "0 10px",
+},
+
 };
 
 export default styles;
