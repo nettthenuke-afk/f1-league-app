@@ -1557,11 +1557,11 @@ def owner_history(db: Session = Depends(get_db)):
                     "points": 0,
                 }
 
-	    if driver_name not in owner_history[user.username][tier_key]:
-	       owner_history[user.username][tier_key][driver_name] = {
-        	"picks": 0,
-	        "points": 0,
-    	    }
+if driver_name not in owner_history[user.username][tier_key]:
+    owner_history[user.username][tier_key][driver_name] = {
+        "picks": 0,
+        "points": 0,
+    }
 
             owner_history[user.username]["all"][driver_name]["picks"] += 1
             owner_history[user.username]["all"][driver_name]["points"] += total_points
@@ -1570,3 +1570,9 @@ def owner_history(db: Session = Depends(get_db)):
             owner_history[user.username][tier_key][driver_name]["points"] += total_points
 
     return owner_history
+
+@app.get("/test-owner-history")
+def test_owner_history():
+    return {
+        "status": "endpoint works"
+    }
