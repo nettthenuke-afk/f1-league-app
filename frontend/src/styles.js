@@ -719,7 +719,7 @@ driverHistoryButton: {
 ownerHistoryButton: {
   position: "relative",
   width: "100%",
-  maxWidth: "320px",
+  maxWidth: "500px",
   height: "110px",
   background: "#050505",
   border: "2px solid #222",
