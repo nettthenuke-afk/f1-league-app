@@ -1499,8 +1499,8 @@ def get_zero_point_weeks(db: Session = Depends(get_db)):
     return standings
 
 # ---- Owner History ----
-@app.get("/owner-history")
-def owner_history():
+@app.get("/owner-history-test")
+def owner_history_test():
     return {
         "status": "owner history endpoint working"
     }
