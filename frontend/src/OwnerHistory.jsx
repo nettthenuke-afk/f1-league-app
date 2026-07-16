@@ -505,77 +505,120 @@ export default function OwnerHistory({ setView }) {
     };
   }).filter(Boolean);
 
-  return (
-    <div>
-      <h1>OWNER HISTORY</h1>
+return (
+  <div style={styles.ownerHistoryPage}>
+    <h1 style={styles.ownerHistoryTitle}>
+      🏎️ OWNER HISTORY
+    </h1>
 
-      {isLoading && <p>Loading live owner history...</p>}
+    {isLoading && (
+      <p style={styles.ownerHistoryStatus}>
+        Loading live owner history...
+      </p>
+    )}
 
-      {loadError && <p>{loadError}</p>}
+    {loadError && (
+      <p style={styles.ownerHistoryStatus}>
+        {loadError}
+      </p>
+    )}
 
-      {ownerCards.map(({ owner, data }) => (
-        <div
-          key={owner}
-          style={{
-            border: "1px solid #666",
-            padding: "16px",
-            marginBottom: "20px",
-            borderRadius: "10px",
-          }}
-        >
-          <h2>{owner}</h2>
+    {ownerCards.map(({ owner, data }) => (
+      <div
+        key={owner}
+        style={styles.ownerHistoryCard}
+      >
+        <h2 style={styles.ownerHistoryOwnerName}>
+          {owner}
+        </h2>
 
-          <p>
-            <strong>Favorite Driver:</strong>{" "}
-            {data.favoriteDriver.driver} ({data.favoriteDriver.picks} picks)
+        <div style={styles.ownerHistorySection}>
+          <p style={styles.ownerHistoryStat}>
+            <span style={styles.ownerHistoryLabel}>
+              Favorite Driver:
+            </span>{" "}
+            {data.favoriteDriver.driver} (
+            {data.favoriteDriver.picks} picks)
           </p>
+        </div>
 
-          <p>
-            <strong>Most Used Tier 1:</strong>{" "}
-            {data.mostUsedTier1.driver} ({data.mostUsedTier1.picks} picks)
+        <div style={styles.ownerHistorySection}>
+          <p style={styles.ownerHistoryStat}>
+            <span style={styles.ownerHistoryLabel}>
+              Most Used Tier 1:
+            </span>{" "}
+            {data.mostUsedTier1.driver} (
+            {data.mostUsedTier1.picks} picks)
           </p>
+        </div>
 
-          <p>
-            <strong>Most Used Tier 2:</strong>{" "}
-            {data.mostUsedTier2.driver} ({data.mostUsedTier2.picks} picks)
+        <div style={styles.ownerHistorySection}>
+          <p style={styles.ownerHistoryStat}>
+            <span style={styles.ownerHistoryLabel}>
+              Most Used Tier 2:
+            </span>{" "}
+            {data.mostUsedTier2.driver} (
+            {data.mostUsedTier2.picks} picks)
           </p>
+        </div>
 
-          <p>
-            <strong>Top Scoring Driver:</strong>{" "}
-            {data.topScoringDriver.driver} ({data.topScoringDriver.points} pts)
+        <div style={styles.ownerHistorySection}>
+          <p style={styles.ownerHistoryStat}>
+            <span style={styles.ownerHistoryLabel}>
+              Top Scoring Driver:
+            </span>{" "}
+            {data.topScoringDriver.driver} (
+            {data.topScoringDriver.points} pts)
           </p>
+        </div>
 
-          <p>
-            <strong>Top Tier 1 Scorer:</strong>{" "}
-            {data.topScoringTier1.driver} ({data.topScoringTier1.points} pts)
+        <div style={styles.ownerHistorySection}>
+          <p style={styles.ownerHistoryStat}>
+            <span style={styles.ownerHistoryLabel}>
+              Top Tier 1 Scorer:
+            </span>{" "}
+            {data.topScoringTier1.driver} (
+            {data.topScoringTier1.points} pts)
           </p>
+        </div>
 
-          <p>
-            <strong>Top Tier 2 Scorer:</strong>{" "}
-            {data.topScoringTier2.driver} ({data.topScoringTier2.points} pts)
+        <div style={styles.ownerHistorySection}>
+          <p style={styles.ownerHistoryStat}>
+            <span style={styles.ownerHistoryLabel}>
+              Top Tier 2 Scorer:
+            </span>{" "}
+            {data.topScoringTier2.driver} (
+            {data.topScoringTier2.points} pts)
           </p>
+        </div>
 
-          <p>
-            <strong>Best Driver Value:</strong>{" "}
+        <div style={styles.ownerHistorySection}>
+          <p style={styles.ownerHistoryStat}>
+            <span style={styles.ownerHistoryLabel}>
+              Best Driver Value:
+            </span>{" "}
             {data.bestValueDriver.driver}
           </p>
 
-          <p>{data.bestValueDriver.pointsPerPick} pts/pick</p>
+          <p style={styles.ownerHistoryStat}>
+            {data.bestValueDriver.pointsPerPick} pts/pick
+          </p>
         </div>
-      ))}
-
-      <div style={{ marginTop: "30px" }}>
-        <button
-          style={styles.backButton}
-          onClick={() => setView("dashboard")}
-        >
-          <div style={styles.sennaStripeTop}></div>
-
-          🏁 Return to Paddock
-
-          <div style={styles.sennaStripeBottom}></div>
-        </button>
       </div>
+    ))}
+
+    <div style={{ marginTop: "30px" }}>
+      <button
+        style={styles.backButton}
+        onClick={() => setView("dashboard")}
+      >
+        <div style={styles.sennaStripeTop}></div>
+
+        🏁 Return to Paddock
+
+        <div style={styles.sennaStripeBottom}></div>
+      </button>
     </div>
-  );
+  </div>
+);
 }

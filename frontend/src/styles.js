@@ -802,6 +802,71 @@ ownerHistoryButtonText: {
   padding: "0 10px",
 },
 
+// ===== OWNER HISTORY - SCHUMACHER =====
+
+ownerHistoryPage: {
+  minHeight: "100vh",
+  background: "#050505",
+  padding: "20px",
+},
+
+ownerHistoryTitle: {
+  textAlign: "center",
+  color: "#ffffff",
+  fontSize: "36px",
+  fontWeight: "900",
+  marginBottom: "30px",
+  letterSpacing: "2px",
+},
+
+ownerHistoryCard: {
+  background:
+    "linear-gradient(135deg,#ff7a1a 0%,#ff4200 35%,#ff1f00 65%,#ff6a00 100%)",
+  border: "3px solid #ffffff",
+  borderRadius: "18px",
+  padding: "20px",
+  marginBottom: "24px",
+  boxShadow: "0 0 12px rgba(255,80,0,0.35)",
+},
+
+ownerHistoryOwnerName: {
+  fontFamily: '"Times New Roman", serif',
+  fontSize: "34px",
+  fontWeight: "900",
+  color: "#ffffff",
+  textAlign: "center",
+  textTransform: "uppercase",
+  marginBottom: "12px",
+  letterSpacing: "1px",
+
+  textShadow:
+    "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+},
+
+ownerHistorySection: {
+  borderTop: "2px solid #ffffff",
+  paddingTop: "10px",
+  paddingBottom: "10px",
+},
+
+ownerHistoryStat: {
+  fontFamily: '"Times New Roman", serif',
+  color: "#ffffff",
+  fontSize: "18px",
+  lineHeight: "1.5",
+  margin: "0",
+},
+
+ownerHistoryLabel: {
+  fontWeight: "700",
+},
+
+ownerHistoryStatus: {
+  color: "#ffffff",
+  textAlign: "center",
+  marginBottom: "20px",
+},
 };
+
 
 export default styles;
