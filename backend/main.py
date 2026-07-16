@@ -1497,3 +1497,75 @@ def get_zero_point_weeks(db: Session = Depends(get_db)):
     )
 
     return standings
+
+# ---- Owner History ----
+@app.get("/owner-history")
+def owner_history(db: Session = Depends(get_db)):
+
+    users = (
+        db.query(User)
+        .filter(User.role != "admin")
+        .all()
+    )
+
+    owner_history = {}
+
+    for user in users:
+        owner_history[user.username] = {
+            "all": {},
+            "tier1": {},
+            "tier2": {},
+        }
+
+        picks = (
+            db.query(Pick)
+            .filter(Pick.user_id == user.id)
+            .all()
+        )
+
+        for pick in picks:
+            driver = (
+                db.query(Driver)
+                .filter(Driver.id == pick.driver_id)
+                .first()
+            )
+
+            if not driver:
+                continue
+
+            driver_name = driver.name
+
+            results = (
+                db.query(Result)
+                .filter(
+                    Result.race_id == pick.race_id,
+                    Result.driver_id == pick.driver_id
+                )
+                .all()
+            )
+
+            total_points = 0
+
+            for result in results:
+                total_points += result.points or 0
+
+            tier_key = "tier2" if pick.tier == 2 else "tier1"
+
+            if driver_name not in owner_history[user.username]["all"]:
+                owner_history[user.username]["all"][driver_name] = {
+                    "picks": 0,
+                    "points": 0,
+                }
+
+            if driver_name not in owner_history[user.username][tier_key]:
+                owner_history[user.username][tier_key][driver_name] = {
+                    "picks": 0,
+                     }
+
+            owner_history[user.username]["all"][driver_name]["picks"] += 1
+            owner_history[user.username]["all"][driver_name]["points"] += total_points
+
+            owner_history[user.username][tier_key][driver_name]["picks"] += 1
+            owner_history[user.username][tier_key][driver_name]["points"] += total_points
+
+    return owner_history
