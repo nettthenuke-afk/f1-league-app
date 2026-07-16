@@ -820,7 +820,7 @@ ownerHistoryTitle: {
 },
 
 ownerHistoryCard: {
-  background: "#ff4d00",
+  background: "#FF3A00",
   border: "3px solid #ffffff",
   borderRadius: "18px",
   padding: "0",
