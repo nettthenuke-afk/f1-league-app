@@ -1499,34 +1499,95 @@ def get_zero_point_weeks(db: Session = Depends(get_db)):
 
 # ---- Owner History ----
 @app.get("/owner-history")
-def owner_history():
-    return {
-        "owners": [
-            {
-                "owner": "Travis",
-                "favorite_driver": "Max Verstappen",
-                "most_used_tier1": "Lando Norris",
-                "most_used_tier2": "Oscar Piastri",
-                "top_scoring_driver": "Max Verstappen",
-                "top_tier1_driver": "Lando Norris",
-                "top_tier2_driver": "Oscar Piastri",
-                "best_value_driver": {
-                    "driver": "Oscar Piastri",
-                    "points_per_pick": 18.4
-                }
-            },
-            {
-                "owner": "Justin",
-                "favorite_driver": "Charles Leclerc",
-                "most_used_tier1": "Charles Leclerc",
-                "most_used_tier2": "George Russell",
-                "top_scoring_driver": "Charles Leclerc",
-                "top_tier1_driver": "Charles Leclerc",
-                "top_tier2_driver": "George Russell",
-                "best_value_driver": {
-                    "driver": "George Russell",
-                    "points_per_pick": 16.7
-                }
+def owner_history(db: Session = Depends(get_db)):
+    """
+    Return live owner/driver aggregates from Picks and Results.
+
+    Response structure intentionally matches
+    HISTORICAL_OWNER_DRIVER_STATS in ownerHistory.js.
+    """
+
+    users = (
+        db.query(User)
+        .filter(User.role != "admin")
+        .all()
+    )
+
+    drivers = db.query(Driver).all()
+
+    user_names = {
+        user.id: user.username
+        for user in users
+    }
+
+    driver_names = {
+        driver.id: driver.name
+        for driver in drivers
+    }
+
+    # Add feature and sprint points together for each race/driver.
+    result_points = {}
+
+    results = db.query(Result).all()
+
+    for result in results:
+        key = (result.race_id, result.driver_id)
+
+        result_points[key] = (
+            result_points.get(key, 0)
+            + (result.points or 0)
+        )
+
+    owners = {}
+
+    for user in users:
+        owners[user.username] = {
+            "all": {},
+            "tier1": {},
+            "tier2": {}
+        }
+
+    picks = db.query(Pick).all()
+
+    for pick in picks:
+        owner = user_names.get(pick.user_id)
+        driver = driver_names.get(pick.driver_id)
+
+        if not owner or not driver:
+            continue
+
+        tier_key = "tier2" if pick.tier == 2 else "tier1"
+
+        points = result_points.get(
+            (pick.race_id, pick.driver_id),
+            0
+        )
+
+        if owner not in owners:
+            owners[owner] = {
+                "all": {},
+                "tier1": {},
+                "tier2": {}
             }
-        ]
+
+        if driver not in owners[owner]["all"]:
+            owners[owner]["all"][driver] = {
+                "picks": 0,
+                "points": 0
+            }
+
+        if driver not in owners[owner][tier_key]:
+            owners[owner][tier_key][driver] = {
+                "picks": 0,
+                "points": 0
+            }
+
+        owners[owner]["all"][driver]["picks"] += 1
+        owners[owner]["all"][driver]["points"] += points
+
+        owners[owner][tier_key][driver]["picks"] += 1
+        owners[owner][tier_key][driver]["points"] += points
+
+    return {
+        "owners": owners
     }

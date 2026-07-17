@@ -19,56 +19,82 @@ const DRIVER_NAME_MAP = {
   leclrerc: "Leclerc",
   lecerc: "Leclerc",
   leclerc: "Leclerc",
+
   russel: "Russell",
   russell: "Russell",
+
   verstappen: "Verstappen",
   perez: "Perez",
+
   sainz: "Sainz",
   saint: "Sainz",
+
   hamilton: "Hamilton",
+
   norris: "Norris",
   lando: "Norris",
+
   piastri: "Piastri",
   alonso: "Alonso",
   stroll: "Stroll",
   bottas: "Bottas",
+
   zhou: "Zhou",
   guanyu: "Zhou",
+
   tsunoda: "Tsunoda",
   yuki: "Tsunoda",
   tsnudoa: "Tsunoda",
   tsunada: "Tsunoda",
+
   ricardo: "Ricciardo",
   riccardo: "Ricciardo",
   ricciardo: "Ricciardo",
+
   sargent: "Sargeant",
+  sargeant: "Sargeant",
+
   albon: "Albon",
+
   gasly: "Gasly",
   gassly: "Gasly",
   gasley: "Gasly",
+
   ocon: "Ocon",
+
   magnussen: "Magnussen",
   magnussem: "Magnussen",
   magnusson: "Magnussen",
+
   schumacher: "Schumacher",
   schumi: "Schumacher",
+
   vettel: "Vettel",
   vetted: "Vettel",
+
   devries: "De Vries",
+
   hulkenberg: "Hulkenberg",
   hulksberg: "Hulkenberg",
   hulkenburg: "Hulkenberg",
   hulk: "Hulkenberg",
+
   lawson: "Lawson",
   hadjar: "Hadjar",
   bearman: "Bearman",
+
   bortoleto: "Bortoleto",
   bortoletto: "Bortoleto",
+
   antonelli: "Antonelli",
+
   colapinto: "Colapinto",
+  calipinto: "Colapinto",
+
   linblad: "Lindblad",
   lindblad: "Lindblad",
   arvid: "Lindblad",
+
   doohan: "Doohan",
 };
 
@@ -81,7 +107,8 @@ function cleanKey(value) {
 
 function normalizeOwner(value) {
   const key = cleanKey(value);
-  return OWNER_NAME_MAP[key] || value || "";
+
+  return OWNER_NAME_MAP[key] || String(value || "").trim();
 }
 
 function normalizeDriver(value) {
@@ -92,7 +119,11 @@ function normalizeDriver(value) {
   }
 
   const key = cleanKey(raw);
-  return DRIVER_NAME_MAP[key] || raw.charAt(0).toUpperCase() + raw.slice(1);
+
+  return (
+    DRIVER_NAME_MAP[key] ||
+    raw.charAt(0).toUpperCase() + raw.slice(1)
+  );
 }
 
 function createEmptyOwnerStats() {
@@ -103,254 +134,79 @@ function createEmptyOwnerStats() {
   };
 }
 
+function addAggregateStat(targetSection, driver, picks, points) {
+  const normalizedDriver = normalizeDriver(driver);
+
+  if (!normalizedDriver) {
+    return;
+  }
+
+  if (!targetSection[normalizedDriver]) {
+    targetSection[normalizedDriver] = {
+      picks: 0,
+      points: 0,
+    };
+  }
+
+  targetSection[normalizedDriver].picks += Number(picks || 0);
+  targetSection[normalizedDriver].points += Number(points || 0);
+}
+
 function cloneHistoricalStats() {
-  const mergedStats = {};
+  const clonedStats = {};
 
   OWNER_ORDER.forEach((owner) => {
-    mergedStats[owner] = createEmptyOwnerStats();
+    clonedStats[owner] = createEmptyOwnerStats();
 
     ["all", "tier1", "tier2"].forEach((section) => {
       const sectionStats =
         HISTORICAL_OWNER_DRIVER_STATS?.[owner]?.[section] || {};
 
       Object.entries(sectionStats).forEach(([driver, stats]) => {
-        mergedStats[owner][section][driver] = {
-          picks: stats.picks || 0,
-          points: stats.points || 0,
-        };
+        addAggregateStat(
+          clonedStats[owner][section],
+          driver,
+          stats?.picks,
+          stats?.points
+        );
       });
     });
   });
 
-  return mergedStats;
+  return clonedStats;
 }
 
-function addDriverStat(stats, owner, tier, driver, points) {
-  const normalizedOwner = normalizeOwner(owner);
-  const normalizedDriver = normalizeDriver(driver);
-
-  if (!OWNER_ORDER.includes(normalizedOwner) || !normalizedDriver) {
-    return;
-  }
-
-  const numericPoints = Number(points || 0);
-  const tierKey = Number(tier) === 2 ? "tier2" : "tier1";
-
-  if (!stats[normalizedOwner]) {
-    stats[normalizedOwner] = createEmptyOwnerStats();
-  }
-
-  if (!stats[normalizedOwner].all[normalizedDriver]) {
-    stats[normalizedOwner].all[normalizedDriver] = {
-      picks: 0,
-      points: 0,
-    };
-  }
-
-  if (!stats[normalizedOwner][tierKey][normalizedDriver]) {
-    stats[normalizedOwner][tierKey][normalizedDriver] = {
-      picks: 0,
-      points: 0,
-    };
-  }
-
-  stats[normalizedOwner].all[normalizedDriver].picks += 1;
-  stats[normalizedOwner].all[normalizedDriver].points += numericPoints;
-
-  stats[normalizedOwner][tierKey][normalizedDriver].picks += 1;
-  stats[normalizedOwner][tierKey][normalizedDriver].points += numericPoints;
-}
-
-function getRaceKey(item) {
-  return (
-    item.race_id ||
-    item.raceId ||
-    item.race ||
-    item.race_name ||
-    item.raceName ||
-    item.grand_prix ||
-    item.grandPrix ||
-    item.event ||
-    ""
-  );
-}
-
-function getResultDriver(item) {
-  return (
-    item.driver ||
-    item.driver_name ||
-    item.driverName ||
-    item.name ||
-    item.selected_driver ||
-    ""
-  );
-}
-
-function getResultPoints(item) {
-  return (
-    item.points ??
-    item.total_points ??
-    item.totalPoints ??
-    item.score ??
-    item.driver_points ??
-    item.driverPoints ??
-    0
-  );
-}
-
-function buildResultPointsMap(results) {
-  const resultMap = {};
-
-  results.forEach((result) => {
-    const raceKey = String(getRaceKey(result)).trim();
-    const driver = normalizeDriver(getResultDriver(result));
-
-    if (!raceKey || !driver) {
-      return;
-    }
-
-    resultMap[`${raceKey}|${driver}`] = Number(getResultPoints(result) || 0);
-  });
-
-  return resultMap;
-}
-
-function getPickOwner(pick) {
-  return (
-    pick.owner ||
-    pick.owner_name ||
-    pick.ownerName ||
-    pick.username ||
-    pick.user_name ||
-    pick.userName ||
-    pick.user?.username ||
-    pick.user?.name ||
-    pick.user?.display_name ||
-    pick.user?.displayName ||
-    ""
-  );
-}
-
-function getPickPoints(pick, fallbackPoints) {
-  return (
-    pick.points ??
-    pick.total_points ??
-    pick.totalPoints ??
-    pick.score ??
-    pick.driver_points ??
-    pick.driverPoints ??
-    fallbackPoints ??
-    0
-  );
-}
-
-function getLivePickEntries(pick, resultPointsMap) {
-  const owner = getPickOwner(pick);
-  const raceKey = String(getRaceKey(pick)).trim();
-
-  const entries = [];
-
-  const tier1Driver =
-    pick.tier1_driver ||
-    pick.tier1Driver ||
-    pick.tier_1_driver ||
-    pick.tierOneDriver ||
-    pick.driver1 ||
-    pick.pick1;
-
-  const tier2Driver =
-    pick.tier2_driver ||
-    pick.tier2Driver ||
-    pick.tier_2_driver ||
-    pick.tierTwoDriver ||
-    pick.driver2 ||
-    pick.pick2;
-
-  if (tier1Driver || tier2Driver) {
-    if (tier1Driver) {
-      const driver = normalizeDriver(tier1Driver);
-      const fallbackPoints = resultPointsMap[`${raceKey}|${driver}`];
-
-      entries.push({
-        owner,
-        tier: 1,
-        driver,
-        points: getPickPoints(
-          {
-            points:
-              pick.tier1_points ??
-              pick.tier1Points ??
-              pick.tier_1_points,
-          },
-          fallbackPoints
-        ),
-      });
-    }
-
-    if (tier2Driver) {
-      const driver = normalizeDriver(tier2Driver);
-      const fallbackPoints = resultPointsMap[`${raceKey}|${driver}`];
-
-      entries.push({
-        owner,
-        tier: 2,
-        driver,
-        points: getPickPoints(
-          {
-            points:
-              pick.tier2_points ??
-              pick.tier2Points ??
-              pick.tier_2_points,
-          },
-          fallbackPoints
-        ),
-      });
-    }
-
-    return entries;
-  }
-
-  const driver =
-    pick.driver ||
-    pick.driver_name ||
-    pick.driverName ||
-    pick.selected_driver ||
-    pick.selectedDriver ||
-    pick.pick;
-
-  const tier = pick.tier || pick.driver_tier || pick.driverTier || 1;
-  const normalizedDriver = normalizeDriver(driver);
-  const fallbackPoints = resultPointsMap[`${raceKey}|${normalizedDriver}`];
-
-  if (normalizedDriver) {
-    entries.push({
-      owner,
-      tier,
-      driver: normalizedDriver,
-      points: getPickPoints(pick, fallbackPoints),
-    });
-  }
-
-  return entries;
-}
-
-function mergeLiveStatsIntoHistorical(picks, results) {
+function mergeLiveStatsIntoHistorical(liveOwners = {}) {
   const mergedStats = cloneHistoricalStats();
-  const resultPointsMap = buildResultPointsMap(results);
 
-  picks.forEach((pick) => {
-    const entries = getLivePickEntries(pick, resultPointsMap);
+  Object.entries(liveOwners).forEach(
+    ([rawOwner, liveOwnerStats]) => {
+      const owner = normalizeOwner(rawOwner);
 
-    entries.forEach((entry) => {
-      addDriverStat(
-        mergedStats,
-        entry.owner,
-        entry.tier,
-        entry.driver,
-        entry.points
-      );
-    });
-  });
+      if (!OWNER_ORDER.includes(owner)) {
+        return;
+      }
+
+      if (!mergedStats[owner]) {
+        mergedStats[owner] = createEmptyOwnerStats();
+      }
+
+      ["all", "tier1", "tier2"].forEach((section) => {
+        const liveSection = liveOwnerStats?.[section] || {};
+
+        Object.entries(liveSection).forEach(
+          ([driver, liveStats]) => {
+            addAggregateStat(
+              mergedStats[owner][section],
+              driver,
+              liveStats?.picks,
+              liveStats?.points
+            );
+          }
+        );
+      });
+    }
+  );
 
   return mergedStats;
 }
@@ -365,9 +221,13 @@ function getTopByPicks(driverStats = {}) {
     };
   }
 
-  const [driver, stats] = entries.sort((a, b) => {
+  const [driver, stats] = [...entries].sort((a, b) => {
     if (b[1].picks !== a[1].picks) {
       return b[1].picks - a[1].picks;
+    }
+
+    if (b[1].points !== a[1].points) {
+      return b[1].points - a[1].points;
     }
 
     return a[0].localeCompare(b[0]);
@@ -375,7 +235,7 @@ function getTopByPicks(driverStats = {}) {
 
   return {
     driver,
-    picks: stats.picks,
+    picks: Number(stats.picks || 0),
   };
 }
 
@@ -389,9 +249,13 @@ function getTopByPoints(driverStats = {}) {
     };
   }
 
-  const [driver, stats] = entries.sort((a, b) => {
+  const [driver, stats] = [...entries].sort((a, b) => {
     if (b[1].points !== a[1].points) {
       return b[1].points - a[1].points;
+    }
+
+    if (b[1].picks !== a[1].picks) {
+      return b[1].picks - a[1].picks;
     }
 
     return a[0].localeCompare(b[0]);
@@ -399,13 +263,13 @@ function getTopByPoints(driverStats = {}) {
 
   return {
     driver,
-    points: stats.points,
+    points: Number(stats.points || 0),
   };
 }
 
 function getBestValueDriver(driverStats = {}) {
   const entries = Object.entries(driverStats).filter(
-    ([, stats]) => stats.picks > 0
+    ([, stats]) => Number(stats?.picks || 0) > 0
   );
 
   if (entries.length === 0) {
@@ -415,28 +279,44 @@ function getBestValueDriver(driverStats = {}) {
     };
   }
 
-  const [driver, stats] = entries.sort((a, b) => {
-    const aValue = a[1].points / a[1].picks;
-    const bValue = b[1].points / b[1].picks;
+  const [driver, stats] = [...entries].sort((a, b) => {
+    const aPicks = Number(a[1].picks || 0);
+    const bPicks = Number(b[1].picks || 0);
+
+    const aPoints = Number(a[1].points || 0);
+    const bPoints = Number(b[1].points || 0);
+
+    const aValue = aPicks > 0 ? aPoints / aPicks : 0;
+    const bValue = bPicks > 0 ? bPoints / bPicks : 0;
 
     if (bValue !== aValue) {
       return bValue - aValue;
     }
 
-    if (b[1].points !== a[1].points) {
-      return b[1].points - a[1].points;
+    if (bPoints !== aPoints) {
+      return bPoints - aPoints;
+    }
+
+    if (bPicks !== aPicks) {
+      return bPicks - aPicks;
     }
 
     return a[0].localeCompare(b[0]);
   })[0];
 
+  const picks = Number(stats.picks || 0);
+  const points = Number(stats.points || 0);
+
   return {
     driver,
-    pointsPerPick: Number((stats.points / stats.picks).toFixed(1)),
+    pointsPerPick:
+      picks > 0
+        ? Number((points / picks).toFixed(1))
+        : 0,
   };
 }
 
-function buildOwnerSummary(ownerStats) {
+function buildOwnerSummary(ownerStats = createEmptyOwnerStats()) {
   return {
     favoriteDriver: getTopByPicks(ownerStats.all),
     mostUsedTier1: getTopByPicks(ownerStats.tier1),
@@ -449,176 +329,200 @@ function buildOwnerSummary(ownerStats) {
 }
 
 export default function OwnerHistory({ setView }) {
-  const [ownerStats, setOwnerStats] = useState(() => cloneHistoricalStats());
+  const [ownerStats, setOwnerStats] = useState(() =>
+    cloneHistoricalStats()
+  );
+
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadLiveOwnerHistory() {
       try {
-        const [picksResponse, resultsResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/picks`),
-          fetch(`${API_BASE_URL}/results`),
-        ]);
+        const response = await fetch(
+          `${API_BASE_URL}/owner-history`
+        );
 
-        if (!picksResponse.ok || !resultsResponse.ok) {
-          throw new Error("Unable to load live picks or results.");
+        if (!response.ok) {
+          throw new Error(
+            `Owner history request failed with status ${response.status}`
+          );
         }
 
-        const picksData = await picksResponse.json();
-        const resultsData = await resultsResponse.json();
+        const data = await response.json();
 
-        const picks = Array.isArray(picksData)
-          ? picksData
-          : picksData.picks || [];
+        if (
+          !data ||
+          typeof data !== "object" ||
+          !data.owners ||
+          typeof data.owners !== "object"
+        ) {
+          throw new Error(
+            "Owner history response was not in the expected format."
+          );
+        }
 
-        const results = Array.isArray(resultsData)
-          ? resultsData
-          : resultsData.results || [];
+        const mergedStats = mergeLiveStatsIntoHistorical(
+          data.owners
+        );
 
-        const mergedStats = mergeLiveStatsIntoHistorical(picks, results);
-
-        setOwnerStats(mergedStats);
-        setLoadError("");
+        if (isMounted) {
+          setOwnerStats(mergedStats);
+          setLoadError("");
+        }
       } catch (error) {
-        console.error("Owner history live merge failed:", error);
-        setOwnerStats(cloneHistoricalStats());
-        setLoadError("Live database stats could not be loaded. Showing historical baseline only.");
+        console.error(
+          "Owner history live merge failed:",
+          error
+        );
+
+        if (isMounted) {
+          setOwnerStats(cloneHistoricalStats());
+
+          setLoadError(
+            "Live database stats could not be loaded. Showing historical baseline only."
+          );
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadLiveOwnerHistory();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const ownerCards = OWNER_ORDER.map((owner) => {
-    const statsForOwner = ownerStats[owner];
-
-    if (!statsForOwner) {
-      return null;
-    }
+    const statsForOwner =
+      ownerStats[owner] || createEmptyOwnerStats();
 
     return {
       owner,
       data: buildOwnerSummary(statsForOwner),
     };
-  }).filter(Boolean);
+  });
 
-return (
-  <div style={styles.ownerHistoryPage}>
-    <h1 style={styles.ownerHistoryTitle}>
-      🏎️ OWNER HISTORY
-    </h1>
+  return (
+    <div style={styles.ownerHistoryPage}>
+      <h1 style={styles.ownerHistoryTitle}>
+        🏎️ OWNER HISTORY
+      </h1>
 
-    {isLoading && (
-      <p style={styles.ownerHistoryStatus}>
-        Loading live owner history...
-      </p>
-    )}
+      {isLoading && (
+        <p style={styles.ownerHistoryStatus}>
+          Loading live owner history...
+        </p>
+      )}
 
-    {loadError && (
-      <p style={styles.ownerHistoryStatus}>
-        {loadError}
-      </p>
-    )}
+      {loadError && (
+        <p style={styles.ownerHistoryStatus}>
+          {loadError}
+        </p>
+      )}
 
-    {ownerCards.map(({ owner, data }) => (
-      <div
-        key={owner}
-        style={styles.ownerHistoryCard}
-      >
-        <h2 style={styles.ownerHistoryOwnerName}>
-          {owner}
-        </h2>
+      {ownerCards.map(({ owner, data }) => (
+        <div
+          key={owner}
+          style={styles.ownerHistoryCard}
+        >
+          <h2 style={styles.ownerHistoryOwnerName}>
+            {owner}
+          </h2>
 
-        <div style={styles.ownerHistorySection}>
-          <p style={styles.ownerHistoryStat}>
-            <span style={styles.ownerHistoryLabel}>
-              Favorite Driver:
-            </span>{" "}
-            {data.favoriteDriver.driver} (
-            {data.favoriteDriver.picks} picks)
-          </p>
+          <div style={styles.ownerHistorySection}>
+            <p style={styles.ownerHistoryStat}>
+              <span style={styles.ownerHistoryLabel}>
+                Favorite Driver:
+              </span>{" "}
+              {data.favoriteDriver.driver} (
+              {data.favoriteDriver.picks} picks)
+            </p>
+          </div>
+
+          <div style={styles.ownerHistorySection}>
+            <p style={styles.ownerHistoryStat}>
+              <span style={styles.ownerHistoryLabel}>
+                Most Used Tier 1:
+              </span>{" "}
+              {data.mostUsedTier1.driver} (
+              {data.mostUsedTier1.picks} picks)
+            </p>
+          </div>
+
+          <div style={styles.ownerHistorySection}>
+            <p style={styles.ownerHistoryStat}>
+              <span style={styles.ownerHistoryLabel}>
+                Most Used Tier 2:
+              </span>{" "}
+              {data.mostUsedTier2.driver} (
+              {data.mostUsedTier2.picks} picks)
+            </p>
+          </div>
+
+          <div style={styles.ownerHistorySection}>
+            <p style={styles.ownerHistoryStat}>
+              <span style={styles.ownerHistoryLabel}>
+                Top Scoring Driver:
+              </span>{" "}
+              {data.topScoringDriver.driver} (
+              {data.topScoringDriver.points} pts)
+            </p>
+          </div>
+
+          <div style={styles.ownerHistorySection}>
+            <p style={styles.ownerHistoryStat}>
+              <span style={styles.ownerHistoryLabel}>
+                Top Tier 1 Scorer:
+              </span>{" "}
+              {data.topScoringTier1.driver} (
+              {data.topScoringTier1.points} pts)
+            </p>
+          </div>
+
+          <div style={styles.ownerHistorySection}>
+            <p style={styles.ownerHistoryStat}>
+              <span style={styles.ownerHistoryLabel}>
+                Top Tier 2 Scorer:
+              </span>{" "}
+              {data.topScoringTier2.driver} (
+              {data.topScoringTier2.points} pts)
+            </p>
+          </div>
+
+          <div style={styles.ownerHistorySection}>
+            <p style={styles.ownerHistoryStat}>
+              <span style={styles.ownerHistoryLabel}>
+                Best Driver Value:
+              </span>{" "}
+              {data.bestValueDriver.driver}
+            </p>
+
+            <p style={styles.ownerHistoryStat}>
+              {data.bestValueDriver.pointsPerPick} pts/pick
+            </p>
+          </div>
         </div>
+      ))}
 
-        <div style={styles.ownerHistorySection}>
-          <p style={styles.ownerHistoryStat}>
-            <span style={styles.ownerHistoryLabel}>
-              Most Used Tier 1:
-            </span>{" "}
-            {data.mostUsedTier1.driver} (
-            {data.mostUsedTier1.picks} picks)
-          </p>
-        </div>
+      <div style={{ marginTop: "30px" }}>
+        <button
+          style={styles.backButton}
+          onClick={() => setView("dashboard")}
+        >
+          <div style={styles.sennaStripeTop}></div>
 
-        <div style={styles.ownerHistorySection}>
-          <p style={styles.ownerHistoryStat}>
-            <span style={styles.ownerHistoryLabel}>
-              Most Used Tier 2:
-            </span>{" "}
-            {data.mostUsedTier2.driver} (
-            {data.mostUsedTier2.picks} picks)
-          </p>
-        </div>
+          🏁 Return to Paddock
 
-        <div style={styles.ownerHistorySection}>
-          <p style={styles.ownerHistoryStat}>
-            <span style={styles.ownerHistoryLabel}>
-              Top Scoring Driver:
-            </span>{" "}
-            {data.topScoringDriver.driver} (
-            {data.topScoringDriver.points} pts)
-          </p>
-        </div>
-
-        <div style={styles.ownerHistorySection}>
-          <p style={styles.ownerHistoryStat}>
-            <span style={styles.ownerHistoryLabel}>
-              Top Tier 1 Scorer:
-            </span>{" "}
-            {data.topScoringTier1.driver} (
-            {data.topScoringTier1.points} pts)
-          </p>
-        </div>
-
-        <div style={styles.ownerHistorySection}>
-          <p style={styles.ownerHistoryStat}>
-            <span style={styles.ownerHistoryLabel}>
-              Top Tier 2 Scorer:
-            </span>{" "}
-            {data.topScoringTier2.driver} (
-            {data.topScoringTier2.points} pts)
-          </p>
-        </div>
-
-        <div style={styles.ownerHistorySection}>
-          <p style={styles.ownerHistoryStat}>
-            <span style={styles.ownerHistoryLabel}>
-              Best Driver Value:
-            </span>{" "}
-            {data.bestValueDriver.driver}
-          </p>
-
-          <p style={styles.ownerHistoryStat}>
-            {data.bestValueDriver.pointsPerPick} pts/pick
-          </p>
-        </div>
+          <div style={styles.sennaStripeBottom}></div>
+        </button>
       </div>
-    ))}
-
-    <div style={{ marginTop: "30px" }}>
-      <button
-        style={styles.backButton}
-        onClick={() => setView("dashboard")}
-      >
-        <div style={styles.sennaStripeTop}></div>
-
-        🏁 Return to Paddock
-
-        <div style={styles.sennaStripeBottom}></div>
-      </button>
     </div>
-  </div>
-);
+  );
 }
