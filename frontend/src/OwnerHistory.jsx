@@ -96,6 +96,25 @@ const DRIVER_NAME_MAP = {
   arvid: "Lindblad",
 
   doohan: "Doohan",
+
+kimiantonelli: "Antonelli",
+andreakimiantonelli: "Antonelli",
+pierregasly: "Gasly",
+charlesleclerc: "Leclerc",
+maxverstappen: "Verstappen",
+gabrielbortoleto: "Bortoleto",
+arvidlindblad: "Lindblad",
+oscarpiastri: "Piastri",
+carlossainz: "Sainz",
+oliverbearman: "Bearman",
+georgerussell: "Russell",
+landonorris: "Norris",
+francocolapinto: "Colapinto",
+liamlawson: "Lawson",
+nicohulkenberg: "Hulkenberg",
+isackhadjar: "Hadjar",
+lewishamilton: "Hamilton",
+yukitsunoda: "Tsunoda",
 };
 
 function cleanKey(value) {
@@ -120,10 +139,27 @@ function normalizeDriver(value) {
 
   const key = cleanKey(raw);
 
-  return (
-    DRIVER_NAME_MAP[key] ||
-    raw.charAt(0).toUpperCase() + raw.slice(1)
-  );
+  if (DRIVER_NAME_MAP[key]) {
+    return DRIVER_NAME_MAP[key];
+  }
+
+  const nameParts = raw.split(/\s+/);
+
+  if (nameParts.length > 1) {
+    const lastName = nameParts[nameParts.length - 1];
+    const lastNameKey = cleanKey(lastName);
+
+    if (DRIVER_NAME_MAP[lastNameKey]) {
+      return DRIVER_NAME_MAP[lastNameKey];
+    }
+
+    return (
+      lastName.charAt(0).toUpperCase() +
+      lastName.slice(1)
+    );
+  }
+
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
 function createEmptyOwnerStats() {
