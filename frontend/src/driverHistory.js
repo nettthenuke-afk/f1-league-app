@@ -33,6 +33,139 @@ export const HISTORICAL_DRIVER_PICK_HISTORY = [
   { driver: "De Vries", picks: 1, pickedRaces: 1, percentage: 1.0 },
 ];
 
+const DRIVER_NAME_MAP = {
+  verstappen: "Verstappen",
+  maxverstappen: "Verstappen",
+
+  leclerc: "Leclerc",
+  charlesleclerc: "Leclerc",
+
+  norris: "Norris",
+  landonorris: "Norris",
+
+  gasly: "Gasly",
+  pierregasly: "Gasly",
+
+  russell: "Russell",
+  georgerussell: "Russell",
+
+  hulkenberg: "Hulkenberg",
+  nicohulkenberg: "Hulkenberg",
+
+  piastri: "Piastri",
+  oscarpiastri: "Piastri",
+
+  ocon: "Ocon",
+  estebanocon: "Ocon",
+
+  perez: "Perez",
+  sergioperez: "Perez",
+
+  hamilton: "Hamilton",
+  lewishamilton: "Hamilton",
+
+  sainz: "Sainz",
+  carlossainz: "Sainz",
+
+  tsunoda: "Tsunoda",
+  yukitsunoda: "Tsunoda",
+
+  bottas: "Bottas",
+  valtteribottas: "Bottas",
+
+  alonso: "Alonso",
+  fernandoalonso: "Alonso",
+
+  albon: "Albon",
+  alexanderalbon: "Albon",
+
+  magnussen: "Magnussen",
+  kevinmagnussen: "Magnussen",
+
+  lawson: "Lawson",
+  liamlawson: "Lawson",
+
+  hadjar: "Hadjar",
+  isackhadjar: "Hadjar",
+
+  stroll: "Stroll",
+  lancestroll: "Stroll",
+
+  bearman: "Bearman",
+  oliverbearman: "Bearman",
+
+  ricciardo: "Ricciardo",
+  danielricciardo: "Ricciardo",
+
+  antonelli: "Antonelli",
+  kimiantonelli: "Antonelli",
+  andreakimiantonelli: "Antonelli",
+
+  vettel: "Vettel",
+  sebastianvettel: "Vettel",
+
+  zhou: "Zhou",
+  zhouguanyu: "Zhou",
+  guanyuzhou: "Zhou",
+
+  colapinto: "Colapinto",
+  francocolapinto: "Colapinto",
+
+  bortoleto: "Bortoleto",
+  gabrielbortoleto: "Bortoleto",
+
+  schumacher: "Schumacher",
+  mickschumacher: "Schumacher",
+
+  lindblad: "Lindblad",
+  arvidlindblad: "Lindblad",
+
+  sargeant: "Sargeant",
+  logansargeant: "Sargeant",
+
+  devries: "De Vries",
+  nyckdevries: "De Vries",
+};
+
+function cleanDriverKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
+}
+
+export function normalizeDriverName(value) {
+  const raw = String(value || "").trim();
+
+  if (!raw) {
+    return "";
+  }
+
+  const fullNameKey = cleanDriverKey(raw);
+
+  if (DRIVER_NAME_MAP[fullNameKey]) {
+    return DRIVER_NAME_MAP[fullNameKey];
+  }
+
+  const nameParts = raw.split(/\s+/);
+
+  if (nameParts.length > 1) {
+    const lastName = nameParts[nameParts.length - 1];
+    const lastNameKey = cleanDriverKey(lastName);
+
+    if (DRIVER_NAME_MAP[lastNameKey]) {
+      return DRIVER_NAME_MAP[lastNameKey];
+    }
+
+    return (
+      lastName.charAt(0).toUpperCase() +
+      lastName.slice(1)
+    );
+  }
+
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
 export function combineDriverPickHistory(
   liveRows = [],
   liveRaceCount = 0
@@ -40,15 +173,21 @@ export function combineDriverPickHistory(
   const totals = {};
 
   HISTORICAL_DRIVER_PICK_HISTORY.forEach((row) => {
-    totals[row.driver] = {
-      driver: row.driver,
-      picks: row.picks,
-      pickedRaces: row.pickedRaces,
+    const driver = normalizeDriverName(row.driver);
+
+    totals[driver] = {
+      driver,
+      picks: Number(row.picks) || 0,
+      pickedRaces: Number(row.pickedRaces) || 0,
     };
   });
 
   liveRows.forEach((row) => {
-    const driver = row.driver;
+    const driver = normalizeDriverName(row.driver);
+
+    if (!driver) {
+      return;
+    }
 
     if (!totals[driver]) {
       totals[driver] = {
@@ -59,11 +198,13 @@ export function combineDriverPickHistory(
     }
 
     totals[driver].picks += Number(row.picks) || 0;
-    totals[driver].pickedRaces += Number(row.pickedRaces) || 0;
+    totals[driver].pickedRaces +=
+      Number(row.pickedRaces) || 0;
   });
 
   const totalRaceCount =
-    HISTORICAL_DRIVER_PICK_HISTORY_TOTAL_RACES + liveRaceCount;
+    HISTORICAL_DRIVER_PICK_HISTORY_TOTAL_RACES +
+    Number(liveRaceCount || 0);
 
   return Object.values(totals)
     .map((row) => ({
@@ -81,6 +222,10 @@ export function combineDriverPickHistory(
     .sort((a, b) => {
       if (b.picks !== a.picks) {
         return b.picks - a.picks;
+      }
+
+      if (b.pickedRaces !== a.pickedRaces) {
+        return b.pickedRaces - a.pickedRaces;
       }
 
       return a.driver.localeCompare(b.driver);

@@ -1,9 +1,83 @@
+import React, { useEffect, useState } from "react";
 import styles from "./styles";
 import {
-  HISTORICAL_DRIVER_PICK_HISTORY
+  HISTORICAL_DRIVER_PICK_HISTORY,
+  combineDriverPickHistory,
 } from "./driverHistory";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
 export default function DriverHistory({ setView }) {
+  const [driverHistory, setDriverHistory] = useState(
+    HISTORICAL_DRIVER_PICK_HISTORY
+  );
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDriverHistory() {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/driver-history`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Driver history request failed with status ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        const liveRows = Array.isArray(data?.rows)
+          ? data.rows
+          : [];
+
+        const liveRaceCount = Number(
+          data?.liveRaceCount || 0
+        );
+
+        const combinedHistory = combineDriverPickHistory(
+          liveRows,
+          liveRaceCount
+        );
+
+        if (isMounted) {
+          setDriverHistory(combinedHistory);
+          setLoadError("");
+        }
+      } catch (error) {
+        console.error(
+          "Driver history live merge failed:",
+          error
+        );
+
+        if (isMounted) {
+          setDriverHistory(
+            HISTORICAL_DRIVER_PICK_HISTORY
+          );
+
+          setLoadError(
+            "Live driver history could not be loaded. Showing historical baseline only."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadDriverHistory();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div style={styles.page}>
       <div style={styles.driverHistoryCard}>
@@ -11,7 +85,19 @@ export default function DriverHistory({ setView }) {
           🐪 Pick History
         </h1>
 
-        {HISTORICAL_DRIVER_PICK_HISTORY.map((driver, index) => (
+        {isLoading && (
+          <p style={styles.ownerHistoryStatus}>
+            Loading live driver history...
+          </p>
+        )}
+
+        {loadError && (
+          <p style={styles.ownerHistoryStatus}>
+            {loadError}
+          </p>
+        )}
+
+        {driverHistory.map((driver, index) => (
           <div
             key={driver.driver}
             style={styles.driverHistoryRow}
@@ -24,9 +110,11 @@ export default function DriverHistory({ setView }) {
               {driver.driver}
             </div>
 
-	   <div style={styles.driverHistoryStats}>
-	     {driver.picks} Picks • {driver.percentage.toFixed(1)}%
-  	   </div>          </div>
+            <div style={styles.driverHistoryStats}>
+              {driver.picks} Picks •{" "}
+              {Number(driver.percentage || 0).toFixed(1)}%
+            </div>
+          </div>
         ))}
       </div>
 
@@ -42,7 +130,6 @@ export default function DriverHistory({ setView }) {
           <div style={styles.sennaStripeBottom}></div>
         </button>
       </div>
-
     </div>
   );
 }

@@ -1497,6 +1497,68 @@ def get_zero_point_weeks(db: Session = Depends(get_db)):
 
     return standings
 
+# ---- Driver Pick History ----
+@app.get("/driver-history")
+def driver_history(db: Session = Depends(get_db)):
+
+    picks = db.query(Pick).all()
+
+    drivers = db.query(Driver).all()
+
+    driver_names = {
+        driver.id: driver.name
+        for driver in drivers
+    }
+
+    driver_stats = {}
+
+    live_race_ids = set()
+
+    for pick in picks:
+
+        driver_name = driver_names.get(pick.driver_id)
+
+        if not driver_name:
+            continue
+
+        live_race_ids.add(pick.race_id)
+
+        if driver_name not in driver_stats:
+            driver_stats[driver_name] = {
+                "picks": 0,
+                "race_ids": set()
+            }
+
+        # Total number of times the driver was selected
+        driver_stats[driver_name]["picks"] += 1
+
+        # Number of distinct race weekends where the driver
+        # was selected by at least one owner
+        driver_stats[driver_name]["race_ids"].add(
+            pick.race_id
+        )
+
+    rows = []
+
+    for driver_name, stats in driver_stats.items():
+        rows.append({
+            "driver": driver_name,
+            "picks": stats["picks"],
+            "pickedRaces": len(stats["race_ids"])
+        })
+
+    rows.sort(
+        key=lambda row: (
+            -row["picks"],
+            row["driver"]
+        )
+    )
+
+    return {
+        "rows": rows,
+        "liveRaceCount": len(live_race_ids)
+    }
+
 # ---- Owner History ----
 @app.get("/owner-history")
 def owner_history(db: Session = Depends(get_db)):
