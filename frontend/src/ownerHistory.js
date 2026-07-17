@@ -44,7 +44,7 @@ export const HISTORICAL_OWNER_DRIVER_STATS = {
         "points": 16
       },
       "Leclerc": {
-        "picks": 100,
+        "picks": 8,
         "points": 76
       },
       "Lindblad": {
