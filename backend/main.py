@@ -218,12 +218,6 @@ class LoginRequest(BaseModel):
 def root():
     return {"message": "F1 League API is running"}
 
-@app.get("/owner-history")
-def owner_history():
-    return {
-        "status": "owner history endpoint working"
-    }
-
 # ---------- USERS ----------
 @app.get("/users")
 def get_users(db: Session = Depends(get_db)):
@@ -1504,3 +1498,35 @@ def get_zero_point_weeks(db: Session = Depends(get_db)):
     return standings
 
 # ---- Owner History ----
+@app.get("/owner-history")
+def owner_history():
+    return {
+        "owners": [
+            {
+                "owner": "Travis",
+                "favorite_driver": "Max Verstappen",
+                "most_used_tier1": "Lando Norris",
+                "most_used_tier2": "Oscar Piastri",
+                "top_scoring_driver": "Max Verstappen",
+                "top_tier1_driver": "Lando Norris",
+                "top_tier2_driver": "Oscar Piastri",
+                "best_value_driver": {
+                    "driver": "Oscar Piastri",
+                    "points_per_pick": 18.4
+                }
+            },
+            {
+                "owner": "Justin",
+                "favorite_driver": "Charles Leclerc",
+                "most_used_tier1": "Charles Leclerc",
+                "most_used_tier2": "George Russell",
+                "top_scoring_driver": "Charles Leclerc",
+                "top_tier1_driver": "Charles Leclerc",
+                "top_tier2_driver": "George Russell",
+                "best_value_driver": {
+                    "driver": "George Russell",
+                    "points_per_pick": 16.7
+                }
+            }
+        ]
+    }
