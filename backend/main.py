@@ -23,34 +23,8 @@ from models import (
 # ✅ GLOBAL CACHE
 race_cache = []
 
-
 # ✅ Create tables
 Base.metadata.create_all(bind=engine)
-
-
-def ensure_draft_state_columns():
-    with engine.begin() as connection:
-        columns = connection.execute(
-            text("PRAGMA table_info(draft_state)")
-        ).fetchall()
-
-        column_names = {
-            column[1]
-            for column in columns
-        }
-
-        if "processed_race_id" not in column_names:
-            connection.execute(
-                text(
-                    "ALTER TABLE draft_state "
-                    "ADD COLUMN processed_race_id INTEGER"
-                )
-            )
-
-
-# ✅ Add missing column to existing database
-ensure_draft_state_columns()
-
 
 app = FastAPI()
 
