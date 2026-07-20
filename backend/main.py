@@ -1,4 +1,5 @@
 import json
+import requests
 
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,8 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from datetime import datetime, timezone
-from datetime import timedelta
+from datetime import datetime, timezone, timedelta
 
 from database import Base, engine, SessionLocal
 from models import User, Team, Driver, Pick, Result, DraftState
@@ -27,8 +27,32 @@ race_cache = []
 # ✅ Create tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
 
+def ensure_draft_state_columns():
+    with engine.begin() as connection:
+        columns = connection.execute(
+            text("PRAGMA table_info(draft_state)")
+        ).fetchall()
+
+        column_names = {
+            column[1]
+            for column in columns
+        }
+
+        if "processed_race_id" not in column_names:
+            connection.execute(
+                text(
+                    "ALTER TABLE draft_state "
+                    "ADD COLUMN processed_race_id INTEGER"
+                )
+            )
+
+
+# ✅ Add missing column to existing database
+ensure_draft_state_columns()
+
+
+app = FastAPI()
 
 # ✅ Draft system
 draft_state = {
@@ -39,16 +63,27 @@ draft_state = {
     "picks_locked": False
 }
 
-# ✅ Populate cache at startup
+# ✅ Populate cache and process completed race at startup
 @app.on_event("startup")
 def startup_sync():
     global race_cache
+
+    db = SessionLocal()
+
     try:
         result = sync_all_f1_data()
         race_cache = result.get("race_result", [])
-        print("Startup sync complete")
-    except Exception as e:
-        print("Startup sync failed:", e)
+
+        processing_result = ensure_latest_race_processed(db)
+
+        print("Startup sync complete:", processing_result)
+
+    except Exception as error:
+        db.rollback()
+        print("Startup sync failed:", error)
+
+    finally:
+        db.close()
 
 
 # ✅ CORS
@@ -75,7 +110,6 @@ def get_db():
         db.close()
 
 # ---------- PICK LOCK HELPER ----------
-from datetime import timedelta
 
 
 def picks_are_locked():
@@ -201,6 +235,336 @@ def get_race_id_from_name(race_name):
 
     return None
 
+# ---------- AUTOMATIC RESULT HELPERS ----------
+def fetch_latest_feature_race():
+    url = "https://api.jolpi.ca/ergast/f1/current/last/results/"
+
+    response = requests.get(url, timeout=20)
+    response.raise_for_status()
+
+    data = response.json()
+
+    races = (
+        data.get("MRData", {})
+        .get("RaceTable", {})
+        .get("Races", [])
+    )
+
+    return races[0] if races else None
+
+
+def fetch_latest_sprint_race():
+    url = "https://api.jolpi.ca/ergast/f1/current/last/sprint/"
+
+    response = requests.get(url, timeout=20)
+    response.raise_for_status()
+
+    data = response.json()
+
+    races = (
+        data.get("MRData", {})
+        .get("RaceTable", {})
+        .get("Races", [])
+    )
+
+    return races[0] if races else None
+
+
+def load_feature_results_for_race(db: Session, race: dict):
+    race_name = race.get("raceName", "")
+    race_id = get_race_id_from_name(race_name)
+
+    if not race_id:
+        raise RuntimeError(f"Could not map race: {race_name}")
+
+    race_results = race.get("Results", [])
+
+    if not race_results:
+        raise RuntimeError(
+            f"No feature results available for {race_name}"
+        )
+
+    db.query(Result).filter(
+        Result.race_id == race_id,
+        Result.race_type == "feature"
+    ).delete(synchronize_session=False)
+
+    loaded = 0
+
+    for result_data in race_results:
+        driver_api_id = (
+            result_data.get("Driver", {}).get("driverId")
+        )
+
+        driver = (
+            db.query(Driver)
+            .filter(Driver.driver_api_id == driver_api_id)
+            .first()
+        )
+
+        if not driver:
+            print("Skipping unmatched driver:", driver_api_id)
+            continue
+
+        db.add(
+            Result(
+                race_id=race_id,
+                driver_id=driver.id,
+                finishing_position=int(result_data["position"]),
+                points=int(float(result_data.get("points", 0))),
+                race_type="feature"
+            )
+        )
+
+        loaded += 1
+
+    return {
+        "race": race_name,
+        "race_id": race_id,
+        "loaded": loaded
+    }
+
+
+def load_sprint_results_for_race(db: Session, race: dict):
+    race_name = race.get("raceName", "")
+    race_id = get_race_id_from_name(race_name)
+
+    if not race_id:
+        raise RuntimeError(f"Could not map sprint race: {race_name}")
+
+    sprint_results = race.get("SprintResults", [])
+
+    if not sprint_results:
+        return {
+            "race": race_name,
+            "race_id": race_id,
+            "loaded": 0
+        }
+
+    db.query(Result).filter(
+        Result.race_id == race_id,
+        Result.race_type == "sprint"
+    ).delete(synchronize_session=False)
+
+    loaded = 0
+
+    for result_data in sprint_results:
+        driver_api_id = (
+            result_data.get("Driver", {}).get("driverId")
+        )
+
+        driver = (
+            db.query(Driver)
+            .filter(Driver.driver_api_id == driver_api_id)
+            .first()
+        )
+
+        if not driver:
+            print("Skipping unmatched sprint driver:", driver_api_id)
+            continue
+
+        db.add(
+            Result(
+                race_id=race_id,
+                driver_id=driver.id,
+                finishing_position=int(result_data["position"]),
+                points=int(float(result_data.get("points", 0))),
+                race_type="sprint"
+            )
+        )
+
+        loaded += 1
+
+    return {
+        "race": race_name,
+        "race_id": race_id,
+        "loaded": loaded
+    }
+
+
+def calculate_pick_order_for_race(db: Session, race_id: int):
+    users = (
+        db.query(User)
+        .filter(User.role != "admin")
+        .all()
+    )
+
+    user_scores = []
+
+    for user in users:
+        pick = (
+            db.query(Pick)
+            .filter(
+                Pick.user_id == user.id,
+                Pick.tier == 1,
+                Pick.race_id == race_id
+            )
+            .first()
+        )
+
+        score = 0
+        finish_position = 999
+
+        if pick:
+            result = (
+                db.query(Result)
+                .filter(
+                    Result.driver_id == pick.driver_id,
+                    Result.race_type == "feature",
+                    Result.race_id == race_id
+                )
+                .first()
+            )
+
+            if result:
+                score = result.points or 0
+                finish_position = result.finishing_position or 999
+
+        user_scores.append({
+            "user_id": user.id,
+            "score": score,
+            "finish_position": finish_position
+        })
+
+    sorted_users = sorted(
+        user_scores,
+        key=lambda item: (
+            item["score"],
+            -item["finish_position"]
+        )
+    )
+
+    return [item["user_id"] for item in sorted_users]
+
+
+def calculate_pick_order_from_previous_race(db: Session):
+    latest_race_row = (
+        db.query(Result.race_id)
+        .filter(Result.race_type == "feature")
+        .order_by(Result.race_id.desc())
+        .first()
+    )
+
+    if not latest_race_row:
+        raise HTTPException(
+            status_code=400,
+            detail="No race results available"
+        )
+
+    return calculate_pick_order_for_race(
+        db,
+        latest_race_row[0]
+    )
+
+
+def ensure_latest_race_processed(db: Session):
+    """
+    Load the latest completed race and create the next draft order once.
+
+    If an existing draft order predates this automation, adopt it without
+    resetting the current draft.
+    """
+
+    try:
+        latest_race = fetch_latest_feature_race()
+
+        if not latest_race:
+            return {"status": "no_feature_results"}
+
+        race_name = latest_race.get("raceName", "")
+        race_id = get_race_id_from_name(race_name)
+
+        if not race_id:
+            return {
+                "status": "race_not_mapped",
+                "race": race_name
+            }
+
+        state = db.query(DraftState).first()
+
+        if not state:
+            state = DraftState(
+                current_index=0,
+                pick_order_json="[]",
+                processed_race_id=None
+            )
+            db.add(state)
+            db.flush()
+
+        if state.processed_race_id == race_id:
+            return {
+                "status": "already_processed",
+                "race": race_name,
+                "race_id": race_id
+            }
+
+        existing_order = json.loads(
+            state.pick_order_json or "[]"
+        )
+
+        # Protect the currently active draft when this feature is first deployed.
+        if state.processed_race_id is None and existing_order:
+            state.processed_race_id = race_id
+            db.commit()
+
+            return {
+                "status": "adopted_existing_order",
+                "race": race_name,
+                "race_id": race_id,
+                "pick_order": existing_order
+            }
+
+        feature_result = load_feature_results_for_race(
+            db,
+            latest_race
+        )
+
+        sprint_loaded = 0
+
+        latest_sprint = fetch_latest_sprint_race()
+
+        if latest_sprint:
+            sprint_name = latest_sprint.get("raceName", "")
+            sprint_race_id = get_race_id_from_name(sprint_name)
+
+            # Only attach sprint results when they belong to the same weekend.
+            if sprint_race_id == race_id:
+                sprint_result = load_sprint_results_for_race(
+                    db,
+                    latest_sprint
+                )
+                sprint_loaded = sprint_result["loaded"]
+
+        pick_order = calculate_pick_order_for_race(
+            db,
+            race_id
+        )
+
+        state.pick_order_json = json.dumps(pick_order)
+        state.current_index = 0
+        state.processed_race_id = race_id
+
+        db.commit()
+
+        return {
+            "status": "processed",
+            "race": race_name,
+            "race_id": race_id,
+            "feature_results_loaded": feature_result["loaded"],
+            "sprint_results_loaded": sprint_loaded,
+            "pick_order": pick_order
+        }
+
+    except Exception as error:
+        db.rollback()
+        print("Automatic post-race processing failed:", error)
+
+        return {
+            "status": "error",
+            "detail": str(error)
+        }
+
+
 # ---------- MODELS ----------
 class UserCreate(BaseModel):
     username: str
@@ -243,7 +607,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     return {"id": new_user.id, "username": new_user.username, "role": new_user.role}
 
-
+# ------LOGIN-----
 @app.post("/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(
@@ -390,117 +754,110 @@ def fix_austria_pick_race_id(
 
 # ---------- DRAFT ----------
 @app.post("/set-pick-order")
-def set_pick_order(order: list[int]):
+def set_pick_order(
+    order: list[int],
+    db: Session = Depends(get_db)
+):
+    state = db.query(DraftState).first()
 
-    draft_state["pick_order"] = order
-    draft_state["current_index"] = 0
+    if not state:
+        state = DraftState()
+        db.add(state)
 
-    # ✅ LOCK tiers automatically
+    state.pick_order_json = json.dumps(order)
+    state.current_index = 0
+
+    db.commit()
+
     draft_state["tiers_locked"] = True
 
-    return {"message": "Pick order set"}
+    return {
+        "message": "Pick order set",
+        "pick_order": order
+    }
 
 
 @app.get("/draft-status")
 def get_draft_status(
     db: Session = Depends(get_db)
 ):
+    automatic_update = ensure_latest_race_processed(db)
 
     state = db.query(DraftState).first()
 
     if not state:
         return {
             "current_user_id": None,
-            "pick_order": []
+            "pick_index": 0,
+            "pick_order": [],
+            "draft_complete": False,
+            "automatic_update": automatic_update
         }
 
-    pick_order = json.loads(
-        state.pick_order_json or "[]"
-    )
+    try:
+        pick_order = json.loads(
+            state.pick_order_json or "[]"
+        )
+    except json.JSONDecodeError:
+        pick_order = []
 
     if not pick_order:
         return {
             "current_user_id": None,
-            "pick_order": []
+            "pick_index": 0,
+            "pick_order": [],
+            "draft_complete": False,
+            "processed_race_id": state.processed_race_id,
+            "automatic_update": automatic_update
         }
 
-    return {
-        "current_user_id": pick_order[state.current_index],
-        "pick_index": state.current_index,
-        "pick_order": pick_order
-    }
-
-# ---------- AUTO PICK ORDER ----------
-def calculate_pick_order_from_previous_race(db: Session):
-    latest_race_id = db.execute(text("""
-        SELECT race_id
-        FROM results
-        WHERE race_type = 'feature'
-        ORDER BY race_id DESC
-        LIMIT 1
-    """)).scalar()
-
-    if not latest_race_id:
-        raise HTTPException(status_code=400, detail="No race results available")
-
-    users = (
-    db.query(User)
-    .filter(User.role != "admin")
-    .all()
-)
-    user_scores = []
-
-    for user in users:
-        pick = db.query(Pick).filter(
-            Pick.user_id == user.id,
-            Pick.tier == 1,
-	    Pick.race_id == latest_race_id
-        ).first()
-
-        score = 0
-        finish_position = 999
-
-        if pick:
-            result = db.execute(text("""
-                SELECT points, finishing_position
-                FROM results
-                WHERE driver_id = :driver_id
-                AND race_type = 'feature'
-                AND race_id = :race_id
-                LIMIT 1
-            """), {
-                "driver_id": pick.driver_id,
-                "race_id": latest_race_id
-            }).fetchone()
-
-            if result:
-                score = result[0] or 0
-                finish_position = result[1] or 999
-
-        user_scores.append({
-            "user_id": user.id,
-            "score": score,
-            "finish_position": finish_position
-        })
-
-    sorted_users = sorted(
-        user_scores,
-        key=lambda x: (x["score"], -x["finish_position"])
+    draft_complete = (
+        state.current_index >= len(pick_order)
     )
 
-    return [u["user_id"] for u in sorted_users]
+    current_user_id = (
+        None
+        if draft_complete
+        else pick_order[state.current_index]
+    )
+
+    return {
+        "current_user_id": current_user_id,
+        "pick_index": state.current_index,
+        "pick_order": pick_order,
+        "draft_complete": draft_complete,
+        "processed_race_id": state.processed_race_id,
+        "automatic_update": automatic_update
+    }
+
 
 # Draft order rule:
-# 1. Lowest Tier 1 feature race points drafts first
-# 2. If tied, worst finishing position drafts first
-# 3. Uses the most recently completed race only
-#----Generate Pick Order-----
+# 1. Lowest Tier 1 feature-race points drafts first.
+# 2. If tied, worst finishing position drafts first.
+# 3. The most recently completed feature race is used.
 @app.post("/generate-pick-order")
 def generate_pick_order(
     db: Session = Depends(get_db)
 ):
+    latest_race_row = (
+        db.query(Result.race_id)
+        .filter(Result.race_type == "feature")
+        .order_by(Result.race_id.desc())
+        .first()
+    )
 
-    pick_order = calculate_pick_order_from_previous_race(db)
+    if not latest_race_row:
+        raise HTTPException(
+            status_code=400,
+            detail="No race results available"
+        )
+
+    latest_race_id = latest_race_row[0]
+
+    pick_order = calculate_pick_order_for_race(
+        db,
+        latest_race_id
+    )
 
     state = db.query(DraftState).first()
 
@@ -510,10 +867,12 @@ def generate_pick_order(
 
     state.pick_order_json = json.dumps(pick_order)
     state.current_index = 0
+    state.processed_race_id = latest_race_id
 
     db.commit()
 
     return {
+        "race_id": latest_race_id,
         "pick_order": pick_order
     }
 
@@ -542,6 +901,12 @@ def submit_picks(data: dict, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=400,
             detail="Pick order not set"
+        )
+
+    if state.current_index >= len(pick_order):
+        raise HTTPException(
+            status_code=400,
+            detail="Draft is already complete"
         )
 
     current_user = pick_order[state.current_index]
@@ -590,7 +955,10 @@ def submit_picks(data: dict, db: Session = Depends(get_db)):
 
     db.commit()
 
-    state.current_index += 1
+    state.current_index = min(
+        state.current_index + 1,
+        len(pick_order)
+    )
     db.commit()
 
     return {"message": "Picks saved"}
@@ -1091,160 +1459,37 @@ def lifetime_standings(db: Session = Depends(get_db)):
 def load_latest_race_results(
     db: Session = Depends(get_db)
 ):
+    race = fetch_latest_feature_race()
 
-    import requests
-
-    url = "https://api.jolpi.ca/ergast/f1/current/last/results/"
-
-    response = requests.get(url)
-    data = response.json()
-
-    races = (
-        data.get("MRData", {})
-        .get("RaceTable", {})
-        .get("Races", [])
-    )
-
-    if not races:
+    if not race:
         raise HTTPException(
             status_code=400,
             detail="No race results returned"
         )
 
-    race = races[0]
-
-    race_name = race["raceName"]
-
-    race_id = get_race_id_from_name(
-        race_name
-    )
-
-    if not race_id:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Could not map race: {race_name}"
-        )
-
-    db.query(Result).filter(
-        Result.race_id == race_id,
-        Result.race_type == "feature"
-    ).delete()
-
-    loaded = 0
-
-    for r in race.get("Results", []):
-
-        api_driver_id = r["Driver"]["driverId"]
-
-        driver = (
-            db.query(Driver)
-            .filter(
-                Driver.driver_api_id == api_driver_id
-            )
-            .first()
-        )
-
-        if not driver:
-            continue
-
-        db.add(
-            Result(
-                race_id=race_id,
-                driver_id=driver.id,
-                finishing_position=int(r["position"]),
-                points=int(float(r["points"])),
-                race_type="feature"
-            )
-        )
-
-        loaded += 1
-
+    result = load_feature_results_for_race(db, race)
     db.commit()
 
-    return {
-        "race": race_name,
-        "race_id": race_id,
-        "loaded": loaded
-    }
+    return result
+
 
 #-----Load Latest Sprint Results-----
 @app.post("/load-latest-sprint-results")
 def load_latest_sprint_results(
     db: Session = Depends(get_db)
 ):
+    race = fetch_latest_sprint_race()
 
-    import requests
-
-    url = "https://api.jolpi.ca/ergast/f1/current/last/sprint/"
-
-    response = requests.get(url)
-    data = response.json()
-
-    races = (
-        data.get("MRData", {})
-        .get("RaceTable", {})
-        .get("Races", [])
-    )
-
-    if not races:
+    if not race:
         return {
             "message": "No sprint results available"
         }
 
-    race = races[0]
-
-    race_name = race["raceName"]
-
-    race_id = get_race_id_from_name(
-        race_name
-    )
-
-    if not race_id:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Could not map race: {race_name}"
-        )
-
-    db.query(Result).filter(
-        Result.race_id == race_id,
-        Result.race_type == "sprint"
-    ).delete()
-
-    loaded = 0
-
-    for r in race.get("SprintResults", []):
-
-        api_driver_id = r["Driver"]["driverId"]
-
-        driver = (
-            db.query(Driver)
-            .filter(
-                Driver.driver_api_id == api_driver_id
-            )
-            .first()
-        )
-
-        if not driver:
-            continue
-
-        db.add(
-            Result(
-                race_id=race_id,
-                driver_id=driver.id,
-                finishing_position=int(r["position"]),
-                points=int(float(r["points"])),
-                race_type="sprint"
-            )
-        )
-
-        loaded += 1
-
+    result = load_sprint_results_for_race(db, race)
     db.commit()
 
-    return {
-        "race": race_name,
-        "loaded": loaded
-    }
+    return result
+
 
 #-----Weekly Wins-----
 @app.get("/weekly-wins")

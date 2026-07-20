@@ -90,15 +90,14 @@ class Race(Base):
 
     race_date = Column(String)
 
-#-----Draft State-----
+# ----- Draft State -----
 class DraftState(Base):
     __tablename__ = "draft_state"
 
     id = Column(Integer, primary_key=True, index=True)
-
     current_index = Column(Integer, default=0)
-
     pick_order_json = Column(String, default="[]")
+    processed_race_id = Column(Integer, nullable=True)
 
 #-----Season Base-----
 class Season(Base):
