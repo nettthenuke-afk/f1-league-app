@@ -372,52 +372,56 @@ const selectedTextColor = darkTeams.includes(d.team)
 
 <div
   style={{
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "4px",
-    marginBottom: "8px",
-    paddingBottom: "0px"
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: "6px",
+    width: "100%",
+    maxWidth: "100%",
+    boxSizing: "border-box",
+    marginBottom: "8px"
   }}
 >
-{pickOrder
-  .filter(userId => userLookup[userId] !== "admin")
-  .map((userId, index) => {
+  {pickOrder
+    .filter(userId => userLookup[userId] !== "admin")
+    .map(userId => {
+      const isCurrent =
+        draftStatus?.current_user_id === userId;
 
-    const isCurrent =
-      draftStatus?.current_user_id === userId;
+      const isMe =
+        user?.id === userId;
 
-    const isMe =
-      user?.id === userId;
+      return (
+        <div
+          key={userId}
+          style={{
+            minWidth: 0,
+            width: "100%",
+            boxSizing: "border-box",
+            padding: "6px 4px",
+            fontSize: "11px",
+            lineHeight: "1.2",
+            textAlign: "center",
+            borderRadius: "8px",
+            overflowWrap: "anywhere",
 
-    return (
-      <div
-        key={userId}
-style={{
-  minWidth: "60px",
-  padding: "6px",
-  fontSize: "12px",
-  textAlign: "center",
-  borderRadius: "8px",
+            background: isCurrent
+              ? "#00cc66"
+              : isMe
+                ? "#0077ff"
+                : "#333",
 
-  background: isCurrent
-    ? "#00cc66"
-    : isMe
-      ? "#0077ff"
-      : "#333",
+            color: "#fff",
+            fontWeight: "700",
 
-  color: "#fff",
-  fontWeight: "700",
-
-  border: isCurrent
-    ? "2px solid #00ff88"
-    : "2px solid #555"
-}}
-
-      >
-        {isMe ? "YOU" : userLookup[userId]}
-      </div>
-    );
-  })}
+            border: isCurrent
+              ? "2px solid #00ff88"
+              : "2px solid #555"
+          }}
+        >
+          {isMe ? "YOU" : userLookup[userId]}
+        </div>
+      );
+    })}
 </div>
 
       <h2 style={{ color: "#fff", textAlign: "center" }}>
