@@ -23,7 +23,7 @@ class Team(Base):
     name = Column(String, nullable=False)
 
     # ✅ ADD THIS (required for API sync)
-    constructor_api_id = Column(Integer, unique=True)
+    constructor_api_id = Column(String, unique=True)
 
     tier = Column(Integer)  # 1, 2, or 3
     is_active = Column(Boolean, default=True)
@@ -38,7 +38,7 @@ class Driver(Base):
     name = Column(String, nullable=False)
 
     # ✅ ADD THIS (required for API mapping)
-    driver_api_id = Column(Integer, unique=True)
+    driver_api_id = Column(String, unique=True)
 
     team_id = Column(Integer, ForeignKey("teams.id"))
     is_active = Column(Boolean, default=True)
